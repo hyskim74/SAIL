@@ -247,6 +247,7 @@ async function putJSON(path,data,sha,message){
 function sortedJson(obj){return JSON.stringify(obj);}
 async function syncBook(book,onStep=()=>{}){
   if(!book?.id)throw new Error('선택한 책이 없습니다.');
+  await ensurePrivateData(); // Refuse to upload notes if Data is no longer private.
   for(const section of ['annotations','progress','alignment']){
     let attempt=0;
     while(attempt<3){
