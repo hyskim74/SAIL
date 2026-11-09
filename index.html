@@ -1380,6 +1380,7 @@ async function playSelection(){
 }
 let marginAutoAbort=null;
 let marginAutoRunPromise=null;
+let marginAutoResetting=false;
 let latestSyncMetric=null;
 const pctSync=n=>Math.max(0,Math.min(100,Number.isFinite(n)?n:0));
 function renderSyncProgress(info={}){
@@ -1598,12 +1599,16 @@ async function runAutomaticBookSync(){
   }
 }
 async function clearAndRestartAutomaticSync(){
+  if(marginAutoResetting)return;
   const b=state.book;
   if(!b)return toast('먼저 책을 선택하세요.',true);
   if(bodyStartPosition()===null||!b.audioTracks?.length)
     return toast('본문 시작 표시와 Audiobook 등록이 필요합니다.',true);
   if(state.syncing)return toast('GitHub 동기화가 끝난 뒤 자동 싱크 기록을 초기화해 주세요.',true);
   if(!confirm('이 책의 기존 자동 단어 싱크와 검색 진행 기록을 삭제하고 처음부터 다시 시작할까요?\n\n수동으로 지정한 오디오 구간과 원본 음원은 유지됩니다.'))return;
+  marginAutoResetting=true;
+  $('#reset-auto-align').disabled=true;
+  try{
   if(marginAutoAbort){
     marginAutoAbort.abort();
     await marginAutoRunPromise?.catch(()=>{});
@@ -1635,6 +1640,10 @@ async function clearAndRestartAutomaticSync(){
   marginAutoRunPromise=runAutomaticBookSync();
   try{await marginAutoRunPromise;}
   finally{marginAutoRunPromise=null;}
+  }finally{
+    marginAutoResetting=false;
+    $('#reset-auto-align').disabled=false;
+  }
 }
 function renderSearch(){const list=$('#search-results');list.replaceChildren();const q=$('#document-search').value.trim();if(!state.book||!q){list.innerHTML='<div class="empty-mini">검색어를 입력하세요.</div>';return;}
   const text=bookText(state.book);let pos=0,n=0;const lq=q.toLowerCase(),lt=text.toLowerCase();
@@ -1801,7 +1810,8 @@ function bindEvents(){
   try{
     const selected=localStorage.getItem('margin-auto-sync-workers');
     if(selected==='1'||selected==='2')$('#sync-parallelism').value=selected;
-    else if(Number(navigator.deviceMemory||8)<=4)$('#sync-parallelism').value='1';
+    else if(window.innerWidth<=900||/Android|iPhone|iPad|Mobile/i.test(navigator.userAgent)||Number(navigator.deviceMemory||8)<=4)
+      $('#sync-parallelism').value='1';
   }catch{}
   $('#sync-parallelism').onchange=e=>{
     try{localStorage.setItem('margin-auto-sync-workers',e.target.value);}catch{}
