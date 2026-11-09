@@ -1097,7 +1097,7 @@ function scheduleSave(markDirty=true){
     finally{state.saveTimers.delete(b.id);}
   },200));
 }
-function scheduleSync(b=state.book){if(!b)return;clearTimeout(state.syncTimers.get(b.id));state.syncTimers.set(b.id,setTimeout(()=>{state.syncTimers.delete(b.id);syncCurrent(false,b);},18000));}
+function scheduleSync(b=state.book){if(!b)return;if(marginAutoAbort&&state.book?.id===b.id)return;clearTimeout(state.syncTimers.get(b.id));state.syncTimers.set(b.id,setTimeout(()=>{state.syncTimers.delete(b.id);syncCurrent(false,b);},18000));}
 async function syncCurrent(manual=true,b=state.book){
   if(!b){if(manual)openGitSettings();return;}
   if(!gitReady()){if(manual)openGitSettings();return;}
@@ -1365,7 +1365,7 @@ function renderSyncProgress(info={}){
   const bodyDone=Math.max(0,(info.cursor||0)-(info.bodyStart||0));
   const audioPct=pctSync((info.audioPosition||0)/Math.max(1,info.audioDuration||1)*100);
   const textPct=pctSync(bodyDone/bodyTotal*100);
-  const pct=phase==='complete'?100:phase==='search'?audioPct:textPct;
+  const pct=phase==='complete'?100:(phase==='search'||phase==='search-paused')?audioPct:textPct;
   const labels={
     idle:'싱크 대기',loading:'음성 모델 준비 중',search:'본문 시작 자동 탐색',
     'search-paused':'본문 시작 검색 일시 중단',
@@ -1458,6 +1458,8 @@ async function runAutomaticBookSync(){
     return toast('이 원서의 자동 싱크가 이미 완료되었습니다.',false);
   }
   const startingState=scans[0]?.scan||null;
+  // An earlier pending notes sync must not contend with on-device ASR.
+  clearTimeout(state.syncTimers.get(b.id));state.syncTimers.delete(b.id);
   let checkpointsChanged=false;
   const wordCache=new Map();
   function addAlignedWords(trackId,record,newWords){
@@ -1538,9 +1540,10 @@ async function runAutomaticBookSync(){
     if(checkpointsChanged){
       clearTimeout(state.saveTimers.get(b.id));state.saveTimers.delete(b.id);
       try{await saveBook(b);}catch(e){toast('싱크 결과 로컬 저장 실패: '+e.message,true);}
-      if(gitReady())scheduleSync(b); // One deferred private backup, not per audio window.
     }
-    marginAutoAbort=null;button.disabled=false;cancel.hidden=true;renderAudio();showBodyStart();
+    marginAutoAbort=null;
+    if(checkpointsChanged&&gitReady())scheduleSync(b); // One deferred private backup, not per audio window.
+    button.disabled=false;cancel.hidden=true;renderAudio();showBodyStart();
   }
 }
 function renderSearch(){const list=$('#search-results');list.replaceChildren();const q=$('#document-search').value.trim();if(!state.book||!q){list.innerHTML='<div class="empty-mini">검색어를 입력하세요.</div>';return;}
