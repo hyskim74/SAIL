@@ -1,0 +1,1095 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#f8f6f0">
+  <title>Margin — English Reading Studio</title>
+  <style>
+:root{--bg:#f8f7f3;--paper:#fffefa;--sidebar:#f3f2ec;--line:#e7e5dc;--ink:#2f342f;--sub:#83887d;--green:#325747;--green-light:#e8eee8;--gold:#ecd99a;--shadow:0 8px 32px rgba(37,50,40,.08);--reader-size:19px}*{box-sizing:border-box}html,body{margin:0;height:100%;font-family:Inter,-apple-system,BlinkMacSystemFont,"Noto Sans KR","Segoe UI",sans-serif;color:var(--ink);background:var(--bg)}button,input,select,textarea{font:inherit}button{cursor:pointer}button:disabled{opacity:.45;cursor:not-allowed}[hidden]{display:none!important}.app-shell{display:flex;height:100vh;min-height:560px;overflow:hidden}.sidebar{width:258px;flex:none;background:var(--sidebar);border-right:1px solid var(--line);display:flex;flex-direction:column;padding:31px 18px 17px}.brand{display:flex;align-items:center;gap:11px;margin:0 10px 55px}.brand-mark{font-family:Georgia,serif;font-size:36px;font-weight:800;letter-spacing:-4px;line-height:1;color:var(--green)}.brand-mark span{color:#ac995e}.brand strong{font-family:Georgia,serif;font-weight:800;letter-spacing:-.6px;font-size:24px;display:block;line-height:1}.brand small{letter-spacing:2px;color:#a2a69e;font-size:9px;font-weight:700}.sidebar-heading{padding:0 9px;display:flex;align-items:center;justify-content:space-between;color:#8b9089;font-size:10px;letter-spacing:1.7px;font-weight:800}.sidebar-heading .icon-btn{font-size:23px}.books-list{margin-top:14px;flex:1;overflow-y:auto}.book-item{width:100%;display:flex;align-items:center;gap:11px;text-align:left;padding:12px 9px;border:0;border-radius:10px;background:none;color:#576159;margin-bottom:5px}.book-item:hover{background:#e9ebe3}.book-item.active{background:#e1e9df;color:#2f5140}.book-spine{width:34px;height:43px;flex:none;border-radius:4px 7px 7px 4px;background:#d8b988;display:flex;align-items:center;justify-content:center;color:#fff;font-family:Georgia,serif;font-size:19px;box-shadow:inset 4px 0 rgba(0,0,0,.08)}.book-item:nth-child(even) .book-spine{background:#789784}.book-item span.book-label{font-size:13px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.book-item small{display:block;color:var(--sub);font-size:10px;font-weight:500;margin-top:4px}.sidebar-bottom{border-top:1px solid #dedfd8;padding-top:18px}.side-action{color:#6a756c;font-size:12px;display:flex;align-items:center;gap:12px;width:100%;padding:12px;border:0;background:none;text-align:left;border-radius:7px}.side-action:hover{background:#e4e9df}.side-action span{font-size:18px;width:18px;text-align:center}.file-action{cursor:pointer}.workspace{flex:1;min-width:0;display:flex;flex-direction:column}.topbar{height:68px;flex:none;background:var(--paper);border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;padding:0 31px;gap:16px}.topbar-left,.topbar-actions{display:flex;align-items:center;gap:13px;min-width:0}.topbar-left strong{font-size:13px;white-space:nowrap;text-overflow:ellipsis;overflow:hidden}.breadcrumb{font-size:10px;letter-spacing:1.6px;color:#979c93;font-weight:800}.crumb-sep{color:#c3c6be}.topbar-actions{margin-left:auto}.sync-state{font-size:11px;color:#7a8b7a;white-space:nowrap}.sync-state.warning{color:#b0713d}.sync-state.error{color:#aa584c}.plain-btn{border:0;background:none;font-size:12px;color:var(--ink);white-space:nowrap}.count{background:#ebeee8;border-radius:20px;padding:1px 6px;font-size:10px}.primary-outline{border:1px solid #b7c8b9;border-radius:8px;padding:9px 14px;background:#eef4ed;color:var(--green);font-size:12px;font-weight:750;white-space:nowrap}.primary-outline:hover{background:#e0ece0}.main-area{flex:1;min-height:0;display:flex}.reader-pane{flex:1;min-width:0;overflow-y:auto;scroll-behavior:smooth}.right-panel{width:314px;flex:none;border-left:1px solid var(--line);background:#fdfcf9;display:flex;flex-direction:column;overflow:hidden}.reading-toolbar{height:70px;padding:0 50px;display:flex;justify-content:space-between;align-items:center}.reader-meta,.reader-tools{display:flex;align-items:center;gap:12px}.reader-meta{font-size:11px;color:#9ca096}.eyebrow{letter-spacing:1.6px;font-size:10px;color:#96a28e;font-weight:800}.meta-dot{font-size:16px}.icon-btn{background:none;border:0;border-radius:8px;color:#778177;padding:6px 8px;font-size:15px}.icon-btn:hover{background:#edf0e8;color:#315741}.reading-article{max-width:920px;margin:15px auto 0;padding:0 76px 80px}.article-title{font-family:Georgia,"Noto Serif",serif;font-weight:500;font-size:43px;letter-spacing:-1px;margin:42px 0 10px;line-height:1.2}.article-subtitle{color:#a6aaa0;font-size:12px;margin-bottom:50px}.reader-content{font-family:Georgia,"Noto Serif",serif;font-size:var(--reader-size);line-height:1.95;letter-spacing:.05px;user-select:text;overflow-wrap:break-word}.reading-block{margin:0 0 1.12em;scroll-margin-top:40px;white-space:pre-wrap}.reading-block:focus{outline:none}.text-piece{white-space:pre-wrap}.text-piece.marked{background:linear-gradient(transparent 45%,#fae8b4 45%);box-decoration-break:clone;-webkit-box-decoration-break:clone}.text-piece.playing-word{background:#bdd9c0!important;border-radius:3px}.inline-annotation{display:block;white-space:normal;margin:11px 0 14px 13px;border-left:3px solid #dbc478;padding:10px 13px;background:#faf7eb;border-radius:0 7px 7px 0;font-family:Inter,"Noto Sans KR",sans-serif;font-size:12px;line-height:1.65;color:#545a50;box-shadow:0 2px 8px rgba(51,55,44,.02)}.inline-annotation .note-top{display:flex;justify-content:space-between;gap:10px;font-size:10px;text-transform:uppercase;letter-spacing:1.1px;font-weight:800;color:#9d8b52;margin-bottom:4px}.inline-annotation .note-actions button{border:0;background:none;color:#a19e91;font-size:12px;padding:0 4px}.inline-annotation .note-actions button:hover{color:#465e46}.inline-annotation.collapsed .note-body{display:none}.endmark{text-align:center;color:#9ea89c;margin:50px 0}.empty-state{max-width:720px;margin:0 auto;text-align:center;padding:clamp(52px,12vh,135px) 22px 30px}.empty-icon{font:100px Georgia,serif;color:#b7c8b9;height:84px}.empty-state h1{font:normal clamp(40px,5vw,60px)/1.12 Georgia,serif;letter-spacing:-2px;margin:22px 0}.empty-state em{color:var(--green)}.empty-state>p:not(.eyebrow){font-size:13px;line-height:2;color:#8a9088}.empty-buttons{display:flex;align-items:center;justify-content:center;gap:12px;margin-top:30px;flex-wrap:wrap}.primary-btn{border:0;border-radius:8px;padding:13px 19px;background:var(--green);color:white;font-weight:700;font-size:12px}.primary-btn:hover{background:#243f33}.secondary-btn{border:1px solid var(--line);background:var(--paper);border-radius:8px;padding:12px 16px;color:#657064;font-size:12px;font-weight:700}.secondary-btn:hover{background:#f0f1e9}.panel-head{padding:28px 23px 10px;display:flex;align-items:center;justify-content:space-between}.panel-head h2{font:normal 26px Georgia,serif;margin:7px 0}.panel-head h2 span{font:11px Inter,sans-serif;background:#edf0e8;border-radius:30px;padding:3px 7px;vertical-align:middle;color:#789078}.panel-tabs{display:flex;padding:0 23px;border-bottom:1px solid var(--line);gap:17px}.tab{border:0;background:none;padding:13px 0;font-size:12px;color:#a0a69b;border-bottom:2px solid transparent}.tab.active{color:var(--green);border-bottom-color:var(--green);font-weight:800}.panel-body{display:none;padding:20px 22px;overflow-y:auto;flex:1}.panel-body.active{display:block}.help-note{background:#f4f4ee;color:#80897f;font-size:11px;line-height:1.8;padding:14px;border-radius:8px;margin-bottom:18px}.text-input,.text-area{width:100%;border:1px solid #e1e5dc;border-radius:7px;background:white;padding:11px 12px;font-size:12px;color:var(--ink);outline:none}.text-input:focus,.text-area:focus{border-color:#799d82;box-shadow:0 0 0 2px #dce9df}.text-area{line-height:1.7;resize:vertical;min-height:95px}.notes-list{margin-top:20px}.side-note{border-bottom:1px solid #e9e8e0;padding:0 0 16px;margin-bottom:16px;cursor:pointer}.side-note:hover .note-quote{color:#305642}.side-note .note-quote{font-family:Georgia,serif;font-size:12px;line-height:1.7;font-style:italic;color:#505951;margin:5px 0 7px}.side-note .note-body{font-size:11px;color:#777f76;line-height:1.7}.side-note .note-category{font-size:9px;color:#a38b4a;text-transform:uppercase;font-weight:800;letter-spacing:1px}.small-label{font-size:10px;letter-spacing:1.4px;font-weight:800;color:#889387;margin:18px 0 12px}.upload-tile{display:block;border:1px dashed #b9c9ba;border-radius:9px;background:#f4f8f2;padding:15px;text-align:center;font-size:12px;font-weight:700;color:#497357;cursor:pointer;margin-bottom:13px}.audio-track{border:1px solid #e9e8df;padding:10px;border-radius:7px;font-size:11px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;gap:5px}.audio-track.active{background:#ecf2eb;border-color:#adc5ae}.audio-track strong{font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:block}.audio-track small{color:#9ca298}.audio-track button{border:0;background:none;padding:4px;color:#4f7758}.field-label{display:block;color:#6e796e;font-size:11px;margin:12px 0 8px}.field-label input{display:block;margin-top:7px}.input-pair{display:flex;gap:10px}.input-pair .field-label{flex:1;min-width:0}.wide{width:100%;margin:8px 0}.fine-text{font-size:10px;line-height:1.6;color:#9c9e93}.timing-item{font-size:10px;color:#737a73;border-top:1px solid #eee;padding:10px 0;display:flex;justify-content:space-between;gap:7px}.timing-item button{border:none;background:none;color:#a15b4f}.player{height:94px;flex:none;background:var(--paper);border-top:1px solid var(--line);display:flex;align-items:center;padding:10px 28px;gap:20px}.player-left{display:flex;align-items:center;gap:11px;width:25%;min-width:150px}.audio-cover{width:44px;height:44px;border-radius:7px;display:grid;place-items:center;background:#e3e9dd;color:#66846c;font-size:22px;flex:none}.player-text{min-width:0}.player-text strong,.player-text span{display:block;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}.player-text strong{font-size:12px}.player-text span{font-size:10px;color:#a0a59c;margin-top:5px}.player-center{flex:1;max-width:550px;min-width:0}.player-buttons{display:flex;justify-content:center;align-items:center;gap:14px}.play-btn{width:36px;height:36px;border-radius:50%;border:0;background:var(--green);color:white;font-size:13px;padding-left:3px}.seek-row{display:flex;align-items:center;gap:10px;color:#a5aaa1;font-size:10px;font-variant-numeric:tabular-nums}.seek-row input{flex:1;min-width:0;accent-color:#547f5c}.speed-select{background:none;border:none;color:#65776c;font-size:12px}.player-right{width:25%;display:flex;justify-content:flex-end}.selection-toolbar{position:fixed;z-index:15;display:flex;background:#314c3b;border-radius:9px;padding:5px;box-shadow:0 6px 25px #0003;gap:2px;max-width:calc(100vw - 20px)}.selection-toolbar button{color:white;background:none;border:0;font-size:12px;padding:10px 12px;border-radius:6px;white-space:nowrap}.selection-toolbar button:hover{background:#476e53}.dialog-overlay{position:fixed;inset:0;z-index:30;background:#29372d8f;display:grid;place-items:center;padding:20px}.dialog{background:#fffefa;border-radius:13px;width:min(540px,100%);max-height:min(85vh,790px);overflow:auto;padding:25px 29px 27px;box-shadow:0 30px 70px #0003}.dialog-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}.dialog h2{margin:0;font:normal 28px Georgia,serif}.dialog p{font-size:12px;line-height:1.75;color:#798078}.dialog .row{display:flex;gap:10px;align-items:center;margin:13px 0}.dialog .row>*{flex:1}.dialog .button-row{display:flex;justify-content:flex-end;gap:9px;margin-top:18px}.quote-chip{background:#f7f3e5;padding:10px;border-left:3px solid #d8c28a;color:#5e594f;font-family:Georgia,serif;font-size:13px;line-height:1.5;margin-bottom:12px;max-height:110px;overflow:auto}.toast{position:fixed;z-index:55;bottom:115px;left:50%;transform:translateX(-50%);background:#2b4837;color:white;padding:12px 18px;font-size:12px;border-radius:9px;box-shadow:var(--shadow);max-width:90vw}.error-text{color:#b15c53!important}.mobile-only{display:none}.icon-small{font-size:9px;color:#b8c3b6}.empty-mini{font-size:11px;color:#abb0a6;line-height:1.8;padding:15px 2px}.search-hit{cursor:pointer;border-bottom:1px solid #eee;padding:12px 0;font:12px/1.6 Georgia,serif}.search-hit mark{background:#f1df9f}.red{color:#b3675f}@media(max-width:1180px){.sidebar{width:205px}.right-panel{width:285px}.reading-article{padding:0 42px 80px}.reading-toolbar{padding:0 28px}.player{padding:10px 15px}.player-right{width:20%}.player-left{width:25%}}@media(max-width:900px){.sidebar{display:none;position:fixed;z-index:20;height:calc(100vh - 94px);top:0;left:0;width:260px;box-shadow:var(--shadow)}.sidebar.open{display:flex}.mobile-only{display:inline-flex}.right-panel{width:270px}.topbar{padding:0 17px}.sync-state{display:none}.article-title{font-size:36px}.reading-article{padding:0 30px 70px}}@media(max-width:650px){.app-shell{min-height:0}.right-panel{display:none;position:fixed;z-index:18;right:0;top:0;bottom:94px;width:min(345px,100vw);box-shadow:var(--shadow)}.right-panel.open{display:flex}.topbar{height:58px}.topbar-actions{gap:4px}.topbar-actions .primary-outline{font-size:0;padding:8px}.topbar-actions .primary-outline::first-letter{font-size:16px}.reading-toolbar{padding:0 15px;height:55px}.reading-article{padding:0 23px 70px;margin-top:0}.article-title{font-size:31px;margin-top:28px}.article-subtitle{margin-bottom:30px}.reader-content{font-size:calc(var(--reader-size) - 1px)}.player{height:105px;padding:8px 10px;gap:5px;flex-wrap:wrap}.player-left{width:42%;min-width:0}.player-center{width:55%;flex:auto}.player-right{width:100%;justify-content:center;display:none}.audio-cover{width:32px;height:32px}.player-buttons{gap:5px}.seek-row{gap:4px}.topbar-left{gap:7px}.breadcrumb,.crumb-sep{display:none}.selection-toolbar{bottom:116px!important;left:50%!important;top:auto!important;transform:translateX(-50%)}.selection-toolbar button{padding:9px 8px;font-size:11px}}
+
+</style>
+</head>
+<body>
+<div id="app" class="app-shell">
+  <aside class="sidebar" id="sidebar">
+    <div class="brand"><div class="brand-mark">m<span>.</span></div><div><strong>margin</strong><small>READING STUDIO</small></div></div>
+    <div class="sidebar-heading"><span>MY LIBRARY</span><button class="icon-btn" id="import-open" title="새 책 가져오기" aria-label="새 책 가져오기">＋</button></div>
+    <div id="books-list" class="books-list"></div>
+    <div class="sidebar-bottom">
+      <button id="open-import" class="side-action"><span>⊕</span> Import a book</button>
+      <button id="open-settings" class="side-action"><span>⚙</span> Settings & sync</button>
+      <button id="export-all" class="side-action"><span>⇩</span> Export backup</button>
+      <label class="side-action file-action"><span>⇧</span> Import backup<input id="import-backup" type="file" accept="application/json,.json" hidden></label>
+    </div>
+  </aside>
+  <div class="workspace">
+    <header class="topbar">
+      <div class="topbar-left"><button id="menu-toggle" class="icon-btn mobile-only" aria-label="책 목록">☰</button><span class="breadcrumb">LIBRARY</span><span class="crumb-sep">/</span><strong id="active-book-title">Welcome</strong></div>
+      <div class="topbar-actions"><span id="save-state" class="sync-state">● Saved locally</span><button id="notes-toggle" class="plain-btn">◫ Notes <span id="notes-count" class="count">0</span></button><button id="open-git-sync" class="primary-outline">↻ Git sync</button></div>
+    </header>
+    <main class="main-area">
+      <section class="reader-pane" id="reader-pane">
+        <div id="empty-state" class="empty-state"><div class="empty-icon">“</div><p class="eyebrow">YOUR PRIVATE READING SPACE</p><h1>Read deeper.<br><em>Listen closer.</em></h1><p>문장을 고르고, 생각을 남기고, 원어민 음성으로 다시 들어보세요.<br>주석과 읽기 기록은 이 기기 또는 개인 GitHub 저장소에 보관됩니다.</p><div class="empty-buttons"><button class="primary-btn" id="welcome-import">+ Bring your first book</button><button class="secondary-btn" id="load-sample">Try sample text</button></div></div>
+        <div id="book-view" hidden>
+          <div class="reading-toolbar"><div class="reader-meta"><span class="eyebrow" id="source-type">BOOK</span><span class="meta-dot">·</span><span id="reader-word-count">0 words</span></div><div class="reader-tools"><button class="icon-btn" id="decrease-font" aria-label="글씨 작게">A−</button><button class="icon-btn" id="increase-font" aria-label="글씨 크게">A+</button><button class="icon-btn" id="toggle-annotations" aria-label="주석 표시 전환">◈</button><button class="icon-btn" id="edit-source" aria-label="원문 수정">✎</button></div></div>
+          <div class="reading-article" id="article"><h1 class="article-title" id="article-title"></h1><p class="article-subtitle">Select a word, expression, or passage to annotate or play.</p><div id="reader-content" class="reader-content" role="article"></div><div class="endmark">✦</div></div>
+        </div>
+      </section>
+      <aside class="right-panel" id="right-panel">
+        <div class="panel-head"><div><span class="eyebrow">YOUR MARGINS</span><h2>Annotations <span id="annotation-count-small">0</span></h2></div><button id="panel-close" class="icon-btn mobile-only">✕</button></div>
+        <div class="panel-tabs"><button id="tab-notes" class="tab active" data-tab="notes">Notes</button><button id="tab-audio" class="tab" data-tab="audio">Audiobook</button><button id="tab-search" class="tab" data-tab="search">Search</button></div>
+        <section id="notes-panel" class="panel-body active"><div class="help-note">원문에서 단어 또는 문장 범위를 드래그하면 주석을 작성할 수 있습니다.</div><input id="note-filter" class="text-input" placeholder="Search notes..." aria-label="주석 검색"><div id="notes-list" class="notes-list"></div></section>
+        <section id="audio-panel" class="panel-body">
+          <div class="small-label">AUDIO FILES</div><label class="upload-tile">＋ Add MP3 / M4A / WAV<input id="audio-upload" type="file" accept="audio/*,.mp3,.m4a,.wav,.ogg" multiple hidden></label><div id="audio-list" class="audio-list"></div>
+          <div class="small-label">IN-BROWSER AUTO ALIGNMENT</div>
+          <div class="help-note">원문 구간을 선택하고, 대응하는 오디오의 시작·종료 시각을 지정하세요. 음성 인식과 매칭은 <strong>브라우저 안에서</strong> 처리합니다. 첫 실행에만 음성 모델 다운로드가 필요하며, 한 번에 최대 180초를 정렬할 수 있습니다.</div>
+          <div class="input-pair"><label class="field-label">Audio from (seconds)<input class="text-input" type="number" id="align-start" min="0" step="0.1" value="0"></label><label class="field-label">Audio to (seconds)<input class="text-input" type="number" id="align-end" min="0" step="0.1" placeholder="예: 90"></label></div>
+          <button class="primary-outline wide" id="auto-align">✧ Align in browser — no server</button>
+          <p id="alignment-status" class="fine-text" role="status">음성과 원문이 일부 다르면 해당 단어의 타임스탬프는 생성하지 않습니다. 결과를 듣고 필요 시 수동 보정하세요.</p>
+          <div class="small-label">MANUAL TIMING</div>
+          <div class="input-pair"><label class="field-label">Start (seconds)<input class="text-input" type="number" id="manual-start" min="0" step="0.01" placeholder="0.00"></label><label class="field-label">End (seconds)<input class="text-input" type="number" id="manual-end" min="0" step="0.01" placeholder="4.20"></label></div>
+          <button class="secondary-btn wide" id="save-manual">Save timing for selection</button><label class="field-label">Playback margin (seconds)<input id="playback-pad" type="number" class="text-input" min="0" max="3" step="0.1" value="0" title="선택 구간 재생 앞뒤로 추가할 여유 시간"></label>
+          <div id="timings-list" class="timings-list"></div>
+        </section>
+        <section id="search-panel" class="panel-body"><div class="help-note">원문에서 단어나 표현을 검색합니다.</div><input id="document-search" class="text-input" placeholder="Search in this book"><div id="search-results" class="notes-list"></div></section>
+      </aside>
+    </main>
+    <footer class="player" id="player"><div class="player-left"><div class="audio-cover">♫</div><div class="player-text"><strong id="audio-current-name">No audiobook selected</strong><span id="audio-current-status">Load a recording in Audiobook</span></div></div><div class="player-center"><div class="player-buttons"><button id="player-loop" class="icon-btn" title="선택 구간 반복" aria-pressed="false">↺</button><button id="player-back" class="icon-btn" title="3초 뒤로">−3</button><button id="player-play" class="play-btn" aria-label="재생">▶</button><button id="player-forward" class="icon-btn" title="3초 앞으로">+3</button><select id="player-speed" class="speed-select" aria-label="재생 속도"><option value="0.75">0.75×</option><option value="0.85">0.85×</option><option value="1" selected>1×</option><option value="1.15">1.15×</option><option value="1.25">1.25×</option><option value="1.5">1.5×</option></select></div><div class="seek-row"><span id="player-time">0:00</span><input id="player-seek" type="range" min="0" max="1000" value="0" aria-label="오디오 위치"><span id="player-duration">0:00</span></div></div><div class="player-right"><button id="player-selection" class="primary-outline" title="선택 범위 오디오 재생">▶ Play selection</button></div><audio id="audio-el" preload="metadata"></audio></footer>
+  </div>
+</div>
+<div id="selection-toolbar" class="selection-toolbar" hidden><button id="selection-annotate">✎ Add note</button><button id="selection-play">▶ Play audio</button><button id="selection-copy">⧉ Copy</button></div>
+<div id="dialog-overlay" class="dialog-overlay" hidden><div class="dialog" role="dialog" aria-modal="true" aria-labelledby="dialog-title"><div class="dialog-top"><h2 id="dialog-title">Dialog</h2><button id="dialog-close" class="icon-btn" aria-label="닫기">✕</button></div><div id="dialog-content"></div></div></div>
+<div id="toast" role="status" class="toast" hidden></div>
+<script type="module">
+
+// ===== model.js =====
+const uuid = () => (globalThis.crypto?.randomUUID?.() ?? `id-${Date.now()}-${Math.random().toString(16).slice(2)}`);
+const isoNow = () => new Date().toISOString();
+function fingerprint(text){let h1=0x811c9dc5,h2=0x811c9dc5;const s=String(text||'');for(let i=0;i<s.length;i++){const v=s.charCodeAt(i);h1=Math.imul(h1^v,16777619)>>>0;h2=Math.imul(h2^(v+i),16777619)>>>0;}return `${s.length.toString(16)}-${h1.toString(16)}-${h2.toString(16)}`;}
+const sanitizeName = s => String(s || 'Untitled').replace(/[\u0000-\u001f]/g, ' ').trim().slice(0, 140) || 'Untitled';
+function paragraphsFromText(text) {
+  const cleaned = String(text || '').replace(/\r\n?/g, '\n').replace(/\u00ad/g, '').trim();
+  return cleaned.split(/\n\s*\n+/).map(x => x.trim()).filter(Boolean);
+}
+function buildBlocks(text) {
+  let cursor = 0;
+  return paragraphsFromText(text).map((p, i) => {
+    const block = { id: `p${i}`, text: p, start: cursor, end: cursor + p.length };
+    cursor = block.end + 2;
+    return block;
+  });
+}
+function bookText(book) { return (book?.blocks || []).map(b=>b.text).join('\n\n'); }
+function makeBook(title, text, sourceType='txt') {
+  const now=isoNow();
+  const blocks=buildBlocks(text);return {id:uuid(),title:sanitizeName(title),sourceType,blocks,sourceFingerprint:fingerprint(blocks.map(b=>b.text).join('\n\n')),createdAt:now,updatedAt:now,
+    annotations:[],progress:{position:0,updatedAt:now},audioTracks:[],audioMappings:[],wordAlignments:{},visibleNotes:true,fontSize:19};
+}
+function getSnippet(book,start,end,max=220){return bookText(book).slice(start,Math.min(end,start+max));}
+function normalizeAnnotation(a){return {...a, start:Number(a.start),end:Number(a.end),updatedAt:a.updatedAt||isoNow(),deletedAt:a.deletedAt||null};}
+function mergeById(local=[], remote=[]) {
+  const map=new Map();
+  for (const item of [...remote,...local]) {
+    if(!item?.id)continue;
+    const old=map.get(item.id);
+    if(!old || (item.updatedAt||'') >= (old.updatedAt||''))map.set(item.id,item);
+  }
+  return [...map.values()].sort((a,b)=>((a.start??0)-(b.start??0)) || a.id.localeCompare(b.id));
+}
+function mergeProgress(local={},remote={}) {
+  return (local.updatedAt||'') >= (remote.updatedAt||'') ? local : remote;
+}
+function mergeAlignment(local={},remote={}) {
+  const result={...remote};
+  for(const [id,data] of Object.entries(local)){
+    if(!result[id] || (data.updatedAt||'') >= (result[id].updatedAt||''))result[id]=data;
+  }
+  return result;
+}
+function wordTokens(text) {
+  const arr=[];const re=/\S+/g;let m;
+  while((m=re.exec(text))!==null) arr.push({text:m[0],start:m.index,end:m.index+m[0].length});
+  return arr;
+}
+function mapWordsToSource(transcript,words) {
+  const tokens=wordTokens(transcript); const mapped=[];
+  for(let i=0;i<Math.min(tokens.length,words.length);i++){
+    const w=words[i];if(!Number.isFinite(w.start)||!Number.isFinite(w.end)||w.end<=w.start)continue;
+    mapped.push({startChar:tokens[i].start,endChar:tokens[i].end,start:w.start,end:w.end,quality:'model'});
+  }
+  return mapped;
+}
+function findActiveWord(words,time) {
+  let lo=0,hi=words.length-1;
+  while(lo<=hi){const mid=(lo+hi)>>1;const w=words[mid]; if(time<w.start) hi=mid-1;else if(time>w.end)lo=mid+1;else return w;}
+  return null;
+}
+function selectedTimeSpan(words,start,end) {
+  if(!words?.length||end<=start)return null;
+  const overlapping=words.filter(w=>w.endChar>start && w.startChar<end && Number.isFinite(w.start) && Number.isFinite(w.end));
+  if(!overlapping.length)return null;
+  // Requiring every selected non-space token to have a timestamp prevents pretending a partially aligned span is exact.
+  return {start:Math.min(...overlapping.map(w=>w.start)),end:Math.max(...overlapping.map(w=>w.end)),count:overlapping.length};
+}
+function locallySaveableBook(book) {
+  return {...book, audioTracks:(book.audioTracks||[]).map(({id,name,type,size,duration})=>({id,name,type,size,duration}))};
+}
+function gitDataset(book) {
+  return {
+    annotations:{bookId:book.id,title:book.title,sourceFingerprint:book.sourceFingerprint||null,annotations:book.annotations||[]},
+    progress:{bookId:book.id,title:book.title,sourceFingerprint:book.sourceFingerprint||null,progress:book.progress||{position:0,updatedAt:isoNow()}},
+    alignment:{bookId:book.id,title:book.title,sourceFingerprint:book.sourceFingerprint||null,audioTracks:book.audioTracks||[],audioMappings:book.audioMappings||[],wordAlignments:book.wordAlignments||{}}
+  };
+}
+function mergeGitDataset(book, remote,section) {
+  if(!remote)return book;
+  if((!book.blocks?.length || !book.sourceFingerprint)&&remote.sourceFingerprint)book.sourceFingerprint=remote.sourceFingerprint;
+  if(section==='annotations')book.annotations=mergeById(book.annotations||[],remote.annotations||[]);
+  if(section==='progress')book.progress=mergeProgress(book.progress||{},remote.progress||{});
+  if(section==='alignment'){
+    book.audioMappings=mergeById(book.audioMappings||[],remote.audioMappings||[]);
+    book.wordAlignments=mergeAlignment(book.wordAlignments||{},remote.wordAlignments||{});
+    const ids=new Set((book.audioTracks||[]).map(t=>t.id));
+    for(const t of remote.audioTracks||[])if(!ids.has(t.id)){book.audioTracks.push(t);ids.add(t.id);}
+  }
+  return book;
+}
+
+
+// ===== storage.js =====
+
+const DB='margin-reader-v1', STORE_BOOKS='books',STORE_AUDIO='audio';
+const FALLBACK_KEY='margin-reader-fallback-books-v1';
+let dbPromise, fallbackInitialized=false, mode='indexedDB';
+const fallbackBooks=new Map(), fallbackAudio=new Map();
+function openDb(){
+  if(dbPromise)return dbPromise;
+  dbPromise=new Promise((resolve,reject)=>{
+    const req=indexedDB.open(DB,1);
+    req.onupgradeneeded=()=>{const d=req.result;if(!d.objectStoreNames.contains(STORE_BOOKS))d.createObjectStore(STORE_BOOKS,{keyPath:'id'});if(!d.objectStoreNames.contains(STORE_AUDIO))d.createObjectStore(STORE_AUDIO,{keyPath:'id'});};
+    req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error);
+  });return dbPromise;
+}
+async function tx(store,action,run){const d=await openDb();return new Promise((resolve,reject)=>{const t=d.transaction(store,action);let answer;const r=run(t.objectStore(store));if(r){r.onsuccess=()=>answer=r.result;r.onerror=()=>reject(r.error);}t.oncomplete=()=>resolve(answer);t.onerror=()=>reject(t.error);});}
+function initFallback(){
+  if(fallbackInitialized)return;
+  fallbackInitialized=true;mode='memory';
+  try{
+    const stored=localStorage.getItem(FALLBACK_KEY);
+    if(stored){for(const book of JSON.parse(stored)){if(book?.id)fallbackBooks.set(book.id,book);}}
+    mode='localStorage';
+  }catch{mode='memory';}
+}
+function persistFallback(){
+  if(mode!=='localStorage')return;
+  try{localStorage.setItem(FALLBACK_KEY,JSON.stringify([...fallbackBooks.values()]));}
+  catch{mode='memory';}
+}
+const storageMode=()=>mode;
+async function listBooks(){try{return await tx(STORE_BOOKS,'readonly',s=>s.getAll());}catch{initFallback();return [...fallbackBooks.values()];}}
+async function getBook(id){try{return await tx(STORE_BOOKS,'readonly',s=>s.get(id));}catch{initFallback();return fallbackBooks.get(id);}}
+async function saveBook(book){
+  const data=locallySaveableBook(book);
+  try{return await tx(STORE_BOOKS,'readwrite',s=>s.put(data));}
+  catch{initFallback();fallbackBooks.set(data.id,data);persistFallback();return data.id;}
+}
+async function removeBook(id){try{return await tx(STORE_BOOKS,'readwrite',s=>s.delete(id));}catch{initFallback();fallbackBooks.delete(id);persistFallback();}}
+async function saveAudio(id,blob){try{return await tx(STORE_AUDIO,'readwrite',s=>s.put({id,blob}));}catch{initFallback();fallbackAudio.set(id,blob);}}
+async function getAudio(id){try{return (await tx(STORE_AUDIO,'readonly',s=>s.get(id)))?.blob||null;}catch{initFallback();return fallbackAudio.get(id)||null;}}
+async function removeAudio(id){try{return await tx(STORE_AUDIO,'readwrite',s=>s.delete(id));}catch{initFallback();fallbackAudio.delete(id);}}
+
+
+// ===== github.js =====
+
+let config={owner:'',repo:'',branch:'main'};
+let token='';
+const API='https://api.github.com';
+const SETTINGS_KEY='margin-git-config-v1';
+try{config={...config,...JSON.parse(localStorage.getItem(SETTINGS_KEY)||'{}')};}catch{}
+const getGitConfig=()=>({...config,authenticated:!!token});
+function setGitConfig(next,secret=''){
+  const owner=(next.owner||'').trim(),repo=(next.repo||'').trim(),branch=(next.branch||'main').trim();
+  if(!/^[\w-]{1,39}$/.test(owner)||!/^[\w.-]{1,100}$/.test(repo)||!branch||/[\s\x00-\x1f]/.test(branch))throw new Error('GitHub owner / repository / branch 값을 확인하세요.');
+  config={owner,repo,branch};try{localStorage.setItem(SETTINGS_KEY,JSON.stringify(config));}catch{}token=secret.trim();
+}
+function clearGitToken(){token='';}
+function gitReady(){return !!token&&!!config.owner&&!!config.repo;}
+async function githubApi(endpoint,options={}){
+  if(!gitReady())throw new Error('GitHub 설정과 접근 토큰을 입력하세요.');
+  const resp=await fetch(`${API}/repos/${encodeURIComponent(config.owner)}/${encodeURIComponent(config.repo)}/${endpoint}`,{
+    ...options,headers:{'Accept':'application/vnd.github+json','Authorization':`Bearer ${token}`,'X-GitHub-Api-Version':'2022-11-28',...(options.headers||{})}
+  });
+  if(resp.status===404&&(!options.method||options.method==='GET'))return null;
+  if(!resp.ok){let detail='';try{detail=(await resp.json()).message||'';}catch{}throw Object.assign(new Error(`GitHub ${resp.status}: ${detail||resp.statusText}`),{status:resp.status});}
+  return resp.json();
+}
+const github=(path,options={})=>githubApi(`contents/${path}`,options);
+function utf8B64(s){const bytes=new TextEncoder().encode(s);let binary='';for(let i=0;i<bytes.length;i+=32768)binary+=String.fromCharCode(...bytes.slice(i,i+32768));return btoa(binary);}
+function decodeB64(s){const binary=atob(s.replace(/\s/g,''));const bytes=Uint8Array.from(binary,c=>c.charCodeAt(0));return new TextDecoder().decode(bytes);}
+const filepath=(id,type)=>`books/${encodeURIComponent(id)}/${type}.json`;
+async function getJSON(path,ref=config.branch){const result=await github(`${path}?ref=${encodeURIComponent(ref)}`);if(!result)return {sha:null,data:null};
+  if(result.type!=='file')throw new Error('GitHub 경로가 파일이 아닙니다.');
+  let content=result.content;
+  if(!content && result.download_url){const r=await fetch(result.download_url,{headers:{Authorization:`Bearer ${token}`}});if(!r.ok)throw new Error('GitHub 파일을 읽을 수 없습니다.');return {sha:result.sha,data:await r.json()};}
+  return {sha:result.sha,data:JSON.parse(decodeB64(content))};
+}
+async function putJSON(path,data,sha,message){
+  const payload={message,content:utf8B64(JSON.stringify(data,null,2)+'\n'),branch:config.branch};if(sha)payload.sha=sha;
+  return github(path,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+}
+function sortedJson(obj){return JSON.stringify(obj);}
+async function syncBook(book,onStep=()=>{}){
+  if(!book?.id)throw new Error('선택한 책이 없습니다.');
+  for(const section of ['annotations','progress','alignment']){
+    let attempt=0;
+    while(attempt<3){
+      attempt++;
+      const path=filepath(book.id,section);
+      const remote=await getJSON(path);
+      mergeGitDataset(book,remote.data,section);
+      const ours=gitDataset(book)[section];
+      if(remote.data&&sortedJson(remote.data)===sortedJson(ours))break;
+      try{
+        await putJSON(path,ours,remote.sha,`Sync ${section} for ${book.title}`);break;
+      }catch(err){if((err.status===409||err.status===422)&&attempt<3)continue;throw err;}
+    }
+    onStep(section);
+  }
+  await updateIndex([{id:book.id,title:book.title,sourceType:book.sourceType,updatedAt:isoNow()}]);
+  return book;
+}
+async function updateIndex(entries){
+  for(let attempt=0;attempt<3;attempt++){
+    const remote=await getJSON('index.json');
+    const existing=remote.data?.books||[];
+    const merged=mergeById(entries,existing);
+    const data={version:1,books:merged};
+    if(sortedJson(data)===sortedJson(remote.data))return data;
+    try{await putJSON('index.json',data,remote.sha,'Update reading library index');return data;}
+    catch(e){if((e.status===409||e.status===422)&&attempt<2)continue;throw e;}
+  }
+}
+async function listRemoteBooks(){return (await getJSON('index.json')).data?.books||[];}
+async function pullRemoteBook(id){
+  const out={};for(const s of ['annotations','progress','alignment'])out[s]=(await getJSON(filepath(id,s))).data;
+  return out;
+}
+
+async function listHistory(bookId,section='annotations'){
+  if(!['annotations','progress','alignment'].includes(section))throw new Error('Invalid section');
+  const path=filepath(bookId,section);
+  const history=await githubApi(`commits?path=${encodeURIComponent(path)}&per_page=20`);
+  return (history||[]).map(x=>({sha:x.sha,date:x.commit?.author?.date||'',message:x.commit?.message?.split('\n')[0]||''}));
+}
+async function getRevision(bookId,section,sha){
+  if(!['annotations','progress','alignment'].includes(section)||!/^[0-9a-f]{40}$/.test(sha))throw new Error('Invalid revision');
+  return (await getJSON(filepath(bookId,section),sha)).data;
+}
+
+
+// ===== importers.js =====
+
+const PDF_VERSION='4.10.38';
+async function pdfLib(){
+  const lib=await import(`https://cdn.jsdelivr.net/npm/pdfjs-dist@${PDF_VERSION}/build/pdf.mjs`);
+  lib.GlobalWorkerOptions.workerSrc=`https://cdn.jsdelivr.net/npm/pdfjs-dist@${PDF_VERSION}/build/pdf.worker.mjs`;
+  return lib;
+}
+async function pdfDocument(file){const lib=await pdfLib();return lib.getDocument({data:new Uint8Array(await file.arrayBuffer())}).promise;}
+function pdfPageText(items){
+  let lines=[],current=null;
+  for(const item of items){
+    if(!('str' in item) || !item.str)continue;
+    const y=item.transform?.[5]??0;
+    const x=item.transform?.[4]??0;
+    const size=Math.abs(item.height||item.transform?.[0]||10);
+    if(!current||Math.abs(current.y-y)>Math.max(2,size*.25)){
+      current={y,x,size,fragments:[],endX:x};lines.push(current);
+    }
+    const gap=x-current.endX;
+    let str=item.str;
+    if(current.fragments.length && gap>size*.15 && !/^\s/.test(str) && !/\s$/.test(current.fragments.at(-1)))str=' '+str;
+    current.fragments.push(str);current.endX=x+(item.width||0);
+    if(item.hasEOL)current=null;
+  }
+  lines=lines.filter(Boolean);
+  const result=[];let paragraph='';let prev=null;
+  for(const l of lines){
+    const line=l.fragments.join('').trim();if(!line)continue;
+    const gap=prev?Math.abs(prev.y-l.y):0;
+    const separated=prev && (gap>Math.max(prev.size,l.size)*1.65 || (Math.abs(l.x-prev.x)>Math.max(prev.size,l.size)*1.6 && /[.!?]["'’”]?\s*$/.test(paragraph)));
+    if(separated&&paragraph){result.push(paragraph);paragraph='';}
+    if(paragraph)paragraph=/[-‐]\s*$/.test(paragraph)?paragraph.replace(/[-‐]\s*$/,'')+line:paragraph+' '+line;
+    else paragraph=line;
+    prev=l;
+  }
+  if(paragraph)result.push(paragraph);
+  return result.join('\n\n');
+}
+async function readPdf(file,onProgress=()=>{}){
+  const pdf=await pdfDocument(file);const pages=[];
+  for(let i=1;i<=pdf.numPages;i++){
+    const page=await pdf.getPage(i);
+    pages.push(pdfPageText((await page.getTextContent()).items));
+    onProgress(`PDF ${i}/${pdf.numPages} 페이지 처리 중…`);
+  }
+  return pages.join('\n\n');
+}
+function injectScript(src){return new Promise((resolve,reject)=>{const existing=document.querySelector(`script[src="${src}"]`);if(existing){if(window.JSZip)return resolve();existing.addEventListener('load',resolve,{once:true});return;}const s=document.createElement('script');s.src=src;s.onload=resolve;s.onerror=()=>reject(new Error('외부 라이브러리를 불러올 수 없습니다. 인터넷 연결을 확인하세요.'));document.head.append(s);});}
+async function readEpub(file,onProgress){
+  await injectScript('https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js');
+  const zip=await window.JSZip.loadAsync(await file.arrayBuffer());
+  const xml=(s)=>new DOMParser().parseFromString(s,'application/xml');
+  const cont=zip.file('META-INF/container.xml');if(!cont)throw new Error('EPUB container.xml을 찾을 수 없습니다.');
+  const contDoc=xml(await cont.async('text'));const opfPath=contDoc.getElementsByTagName('rootfile')[0]?.getAttribute('full-path');if(!opfPath)throw new Error('OPF 파일을 찾을 수 없습니다.');
+  const opf=xml(await zip.file(opfPath).async('text'));
+  const dir=opfPath.includes('/')?opfPath.slice(0,opfPath.lastIndexOf('/')+1):'';
+  const manifest=new Map([...opf.getElementsByTagName('item')].map(x=>[x.getAttribute('id'),x.getAttribute('href')]));
+  const refs=[...opf.getElementsByTagName('itemref')].map(x=>x.getAttribute('idref'));
+  const text=[];
+  for(const [i,id] of refs.entries()){
+    const href=manifest.get(id);if(!href)continue;
+    const path=resolveEpubPath(dir,decodeURIComponent(href.split('#')[0]));
+    const fileInZip=zip.file(path);if(!fileInZip)continue;
+    const doc=new DOMParser().parseFromString(await fileInZip.async('text'),'text/html');
+    for(const el of doc.querySelectorAll('script,style,nav,svg'))el.remove();
+    const main=doc.querySelector('body')||doc;
+    const parts=[...main.querySelectorAll('h1,h2,h3,h4,p,blockquote,li')]
+      .filter(el=>!el.parentElement?.closest('p,blockquote,li,h1,h2,h3,h4'))
+      .map(el=>el.textContent.replace(/\s+/g,' ').trim()).filter(Boolean);
+    if(parts.length)text.push(...parts);
+    else if(main.textContent.trim())text.push(main.textContent.replace(/\s+/g,' ').trim());
+    onProgress(`EPUB ${i+1}/${refs.length} 챕터 처리 중…`);
+  }
+  return text.join('\n\n');
+}
+function resolveEpubPath(dir,href){const stack=[];for(const p of (dir+href).split('/')){if(!p||p==='.')continue;if(p==='..')stack.pop();else stack.push(p);}return stack.join('/');}
+async function importBook(file,onProgress=()=>{}){
+  const ext=file.name.split('.').at(-1)?.toLowerCase();let text='';
+  if(ext==='pdf')text=await readPdf(file,onProgress);
+  else if(ext==='epub')text=await readEpub(file,onProgress);
+  else if(['txt','md','html','htm'].includes(ext)){
+    text=await file.text();if(['html','htm'].includes(ext)){const doc=new DOMParser().parseFromString(text,'text/html');for(const n of doc.querySelectorAll('script,style'))n.remove();text=[...doc.querySelectorAll('p,h1,h2,h3,li')].map(x=>x.textContent.trim()).filter(Boolean).join('\n\n')||doc.body.textContent;}
+  } else throw new Error('PDF, EPUB, TXT, MD, HTML만 지원합니다.');
+  if(!text.trim())throw new Error('텍스트를 추출하지 못했습니다. 스캔 PDF라면 OCR을 사용하세요.');
+  return makeBook(file.name.replace(/\.[^.]+$/,''),text,ext);
+}
+async function ocrPdf(file,onProgress=()=>{}){
+  if(!window.Tesseract)await injectScript('https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js');
+  const pdf=await pdfDocument(file);const worker=await window.Tesseract.createWorker('eng');
+  const text=[];
+  try{
+    for(let i=1;i<=pdf.numPages;i++){
+      onProgress(`OCR ${i}/${pdf.numPages} (느릴 수 있음)`);
+      const page=await pdf.getPage(i);const viewport=page.getViewport({scale:1.6});const canvas=document.createElement('canvas');canvas.width=viewport.width;canvas.height=viewport.height;
+      await page.render({canvasContext:canvas.getContext('2d'),viewport}).promise;
+      text.push((await worker.recognize(canvas)).data.text);
+      canvas.width=0;canvas.height=0;
+    }
+  }finally{await worker.terminate();}
+  return makeBook(file.name.replace(/\.[^.]+$/,'')+' (OCR)',text.join('\n\n'),'pdf-ocr');
+}
+
+
+// ===== audio.js =====
+
+
+class AudioController{
+  constructor(audio,ui,onActiveWord){
+    this.audio=audio;this.ui=ui;this.onActiveWord=onActiveWord;this.book=null;this.trackId=null;this.url=null;this.range=null;this.loop=false;this.highlightKey='';
+    audio.addEventListener('loadedmetadata',()=>this.update());
+    audio.addEventListener('timeupdate',()=>this.update());
+    audio.addEventListener('play',()=>{ui.play.textContent='❚❚';this.update();});
+    audio.addEventListener('pause',()=>{ui.play.textContent='▶';this.update();});
+    audio.addEventListener('ended',()=>{this.range=null;this.update();});
+    ui.play.addEventListener('click',()=>{if(!this.audio.src)return;this.audio.paused?this.audio.play().catch(()=>{}):this.audio.pause();});
+    ui.seek.addEventListener('input',()=>{if(this.audio.duration)this.audio.currentTime=Number(ui.seek.value)/1000*this.audio.duration;});
+    ui.speed.addEventListener('change',()=>this.audio.playbackRate=Number(ui.speed.value));
+    ui.back.addEventListener('click',()=>this.seekBy(-3));ui.forward.addEventListener('click',()=>this.seekBy(3));
+    ui.loop.addEventListener('click',()=>{this.loop=!this.loop;ui.loop.setAttribute('aria-pressed',String(this.loop));ui.loop.style.color=this.loop?'#2f7651':'';});
+  }
+  seekBy(s){if(this.audio.src)this.audio.currentTime=Math.max(0,Math.min(this.audio.duration||Infinity,this.audio.currentTime+s));}
+  async useTrack(book,trackId){
+    this.audio.pause();this.book=book;this.trackId=trackId;this.range=null;this.highlightKey='';
+    if(this.url)URL.revokeObjectURL(this.url);this.url=null;this.audio.removeAttribute('src');this.audio.load();
+    const meta=book?.audioTracks?.find(t=>t.id===trackId);const blob=trackId?await getAudio(trackId):null;
+    this.ui.name.textContent=meta?.name||'No audiobook selected';
+    this.ui.status.textContent=blob?'Ready to listen':'이 기기에 오디오 파일이 없습니다. 다시 업로드하세요.';
+    if(blob){this.url=URL.createObjectURL(blob);this.audio.src=this.url;this.audio.playbackRate=Number(this.ui.speed.value);}
+    this.update();return !!blob;
+  }
+  setBook(book){this.book=book;this.trackId=null;this.range=null;this.audio.pause();if(this.url)URL.revokeObjectURL(this.url);this.url=null;this.audio.removeAttribute('src');this.audio.load();this.ui.name.textContent='No audiobook selected';this.ui.status.textContent='Load a recording in Audiobook';this.update();}
+  timeForRange(start,end){
+    if(!this.book||!this.trackId)return null;
+    // Manual corrections must override erroneous automatic alignments.
+    const manual=(this.book.audioMappings||[]).filter(m=>!m.deletedAt&&m.trackId===this.trackId&&m.startChar===start&&m.endChar===end).sort((a,b)=>b.updatedAt.localeCompare(a.updatedAt))[0];
+    if(manual)return {start:manual.start,end:manual.end,exact:true,type:'manual'};
+    const alignment=this.book.wordAlignments?.[this.trackId];const words=alignment?.words||[];
+    const tokens=[...this.book.blocks].flatMap(b=>[...b.text.matchAll(/\S+/g)].filter(m=>b.start+m.index<end&&b.start+m.index+m[0].length>start));
+    const matching=words.filter(w=>w.endChar>start && w.startChar<end && Number.isFinite(w.start) && Number.isFinite(w.end));
+    if(matching.length&&matching.length===tokens.length){
+      const v=selectedTimeSpan(words,start,end);return {...v,exact:true,type:'words'};
+    }
+    return null;
+  }
+  async playSelection(start,end,pad=0){
+    const span=this.timeForRange(start,end);
+    if(!span)return {ok:false,message:'선택 구간에 일치하는 단어별 타임스탬프 또는 정확한 수동 구간이 없습니다.'};
+    if(!this.audio.src)return {ok:false,message:'먼저 해당 오디오 파일을 이 기기에 업로드하세요.'};
+    this.range={start:Math.max(0,span.start-pad),end:Math.min(this.audio.duration||Infinity,span.end+pad)};
+    this.audio.currentTime=this.range.start;
+    try{await this.audio.play();}catch(e){return {ok:false,message:`재생 실패: ${e.message}`};}
+    return {ok:true,span};
+  }
+  update(){
+    const a=this.audio;
+    if(this.range&&a.currentTime>=this.range.end-.04){
+      if(this.loop){a.currentTime=this.range.start;if(a.paused)a.play().catch(()=>{});}else{a.pause();this.range=null;}
+    }
+    this.ui.time.textContent=this.format(a.currentTime||0);this.ui.duration.textContent=this.format(Number.isFinite(a.duration)?a.duration:0);
+    this.ui.seek.value=Number.isFinite(a.duration)&&a.duration>0?String(Math.round(a.currentTime/a.duration*1000)):'0';
+    const words=this.book?.wordAlignments?.[this.trackId]?.words||[];
+    const w=words.length?findActiveWord(words,a.currentTime):null;
+    const key=w?`${w.startChar}-${w.endChar}`:'';
+    if(key!==this.highlightKey){this.highlightKey=key;this.onActiveWord(w);}
+  }
+  format(t){const n=Math.floor(Math.max(0,t));return `${Math.floor(n/60)}:${String(n%60).padStart(2,'0')}`;}
+}
+
+
+// ===== browser-align.js =====
+/** Browser-only word alignment, with no server and no uploaded audio.
+ * Whisper recognizes the selected audio locally; a monotonic sequence matcher
+ * links *exactly recognized* words to the selected source. Unmatched words are
+ * intentionally not assigned fabricated timestamps.
+ */
+const WHISPER_LIB = 'https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.8.1';
+const WHISPER_MODEL = 'Xenova/whisper-tiny.en';
+let recognizerPromise;
+
+function normalizeWord(value) {
+  return String(value || '')
+    .normalize('NFKC')
+    .replace(/[‘’´`]/g, "'")
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, '');
+}
+
+function sourceTokens(text) {
+  return [...String(text).matchAll(/\S+/g)]
+    .map(m => ({ text: m[0], normalized: normalizeWord(m[0]), startChar: m.index, endChar: m.index + m[0].length }))
+    .filter(t => t.normalized);
+}
+
+/** Finds a monotonic mapping of matching words while allowing ASR insertions/deletions.
+ * Uses a bounded LCS dynamic program; a match requires the same normalized word.
+ */
+function matchRecognizedWords(sourceText, chunks, maxCells = 3_000_000) {
+  const tokens = sourceTokens(sourceText);
+  const recognized = (Array.isArray(chunks) ? chunks : [])
+    .map(c => ({ text: c.text || '', normalized: normalizeWord(c.text),
+      start: Number(c.timestamp?.[0]), end: Number(c.timestamp?.[1]) }))
+    .filter(c => c.normalized && Number.isFinite(c.start) && Number.isFinite(c.end) && c.end > c.start);
+  const n = tokens.length, m = recognized.length;
+  if (!n || !m) return { words: [], total: n, recognized: m, coverage: 0 };
+  if (n * m > maxCells) throw new Error('정렬할 단어가 너무 많습니다. 더 짧은 구간을 선택하세요.');
+  const columns = m + 1;
+  const dp = new Uint16Array((n + 1) * columns);
+  for (let i = n - 1; i >= 0; i--) {
+    for (let j = m - 1; j >= 0; j--) {
+      const index = i * columns + j;
+      if (tokens[i].normalized === recognized[j].normalized)
+        dp[index] = dp[(i + 1) * columns + j + 1] + 1;
+      else
+        dp[index] = Math.max(dp[(i + 1) * columns + j], dp[i * columns + j + 1]);
+    }
+  }
+  const words = [];
+  let i = 0, j = 0;
+  while (i < n && j < m) {
+    if (tokens[i].normalized === recognized[j].normalized) {
+      words.push({ startChar: tokens[i].startChar, endChar: tokens[i].endChar,
+        start: recognized[j].start, end: recognized[j].end, quality: 'asr-match' });
+      i++; j++;
+    } else if (dp[(i + 1) * columns + j] >= dp[i * columns + j + 1]) i++;
+    else j++;
+  }
+  return { words, total: n, recognized: m, coverage: words.length / n };
+}
+
+function resampleSegment(buffer, start, end, targetRate = 16000) {
+  const rate = buffer.sampleRate;
+  const startSample = Math.max(0, Math.floor(start * rate));
+  const endSample = Math.min(buffer.length, Math.ceil(end * rate));
+  const length = Math.ceil((endSample - startSample) * targetRate / rate);
+  if (length <= 0) throw new Error('선택한 오디오 시간 구간이 비어 있습니다.');
+  const mono = new Float32Array(length);
+  const channels = Array.from({ length: buffer.numberOfChannels }, (_, c) => buffer.getChannelData(c));
+  for (let i = 0; i < length; i++) {
+    const p = startSample + i * rate / targetRate;
+    const a = Math.min(buffer.length - 1, Math.floor(p));
+    const b = Math.min(buffer.length - 1, a + 1);
+    const frac = p - a;
+    let sample = 0;
+    for (const ch of channels) sample += ch[a] * (1 - frac) + ch[b] * frac;
+    mono[i] = sample / channels.length;
+  }
+  return mono;
+}
+
+async function recognizer(onProgress) {
+  if (!recognizerPromise) {
+    recognizerPromise = (async () => {
+      onProgress('Whisper 모델 다운로드 및 로딩 중… 처음 실행 시 인터넷과 모델 다운로드가 필요합니다.');
+      const { pipeline, env } = await import(WHISPER_LIB);
+      env.allowLocalModels = false;
+      return pipeline('automatic-speech-recognition', WHISPER_MODEL, {
+        progress_callback: p => {
+          if (p?.status === 'progress' && Number.isFinite(p.progress))
+            onProgress(`브라우저 음성 모델 다운로드: ${Math.round(p.progress)}%`);
+          else if (p?.status === 'initiate') onProgress(`모델 파일 준비: ${p.file || ''}`);
+        }
+      });
+    })().catch(err => { recognizerPromise = null; throw err; });
+  }
+  return recognizerPromise;
+}
+
+/** Transcribe a bounded time region in-browser and line up recognized words with source.
+ * Restrict to a short clip: full audiobooks can exhaust browser memory.
+ */
+async function alignAudioInBrowser(blob, transcript, start, end, onProgress = () => {}) {
+  if (!blob || !transcript?.trim()) throw new Error('원문 범위와 오디오 파일이 필요합니다.');
+  if (!(Number.isFinite(start) && Number.isFinite(end) && end > start && start >= 0))
+    throw new Error('시작/종료 시각을 확인하세요.');
+  if (end - start > 180) throw new Error('브라우저 자동 정렬은 한 번에 최대 180초입니다. 여러 구간으로 나누어 주세요.');
+  const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+  let waveform;
+  try {
+    onProgress('오디오를 브라우저에서 디코딩 중…');
+    const decoded = await audioContext.decodeAudioData(await blob.arrayBuffer());
+    if (end > decoded.duration + 0.05) throw new Error(`오디오 길이 ${decoded.duration.toFixed(1)}초를 초과합니다.`);
+    waveform = resampleSegment(decoded, start, end);
+  } finally { await audioContext.close().catch(() => {}); }
+  const pipe = await recognizer(onProgress);
+  onProgress('음성 인식 및 단어별 시간 계산 중… (브라우저 성능에 따라 오래 걸릴 수 있습니다)');
+  const result = await pipe(waveform, {
+    return_timestamps: 'word', language: 'english', task: 'transcribe',
+    chunk_length_s: 30, stride_length_s: 5
+  });
+  const matched = matchRecognizedWords(transcript, result?.chunks || []);
+  return {
+    ...matched,
+    words: matched.words.map(w => ({ ...w, start: w.start + start, end: w.end + start })),
+    transcript: String(result?.text || ''),
+    model: WHISPER_MODEL
+  };
+}
+
+
+// ===== app.js =====
+
+
+
+
+
+
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const E=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const state={books:[],book:null,selection:null,showNotes:true,activeTrack:null,playingWord:null,searchHits:[],busy:false,saveTimers:new Map(),syncTimers:new Map(),syncing:false};
+const elements={reader:$('#reader-content'),books:$('#books-list'),selectionBar:$('#selection-toolbar')};
+const player=new AudioController($('#audio-el'),{play:$('#player-play'),back:$('#player-back'),forward:$('#player-forward'),loop:$('#player-loop'),speed:$('#player-speed'),seek:$('#player-seek'),name:$('#audio-current-name'),status:$('#audio-current-status'),time:$('#player-time'),duration:$('#player-duration')},onPlayingWord);
+let saveTimer,positionTimer,toastTimer;
+function toast(message,isError=false){const el=$('#toast');el.textContent=message;el.style.background=isError?'#a75b4d':'#2b4837';el.hidden=false;clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.hidden=true,4500);}
+function saveStatus(msg,kind=''){const el=$('#save-state');el.textContent='● '+msg;el.className='sync-state '+kind;}
+function download(name,text,type='application/json'){const url=URL.createObjectURL(new Blob([text],{type}));const a=document.createElement('a');a.href=url;a.download=name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);}
+function activeNotes(){return (state.book?.annotations||[]).filter(a=>!a.deletedAt&&!a.orphaned);}
+function noteText(a){return a.quote||getSnippet(state.book,a.start,a.end);}
+function showDialog(title,html){$('#dialog-title').textContent=title;$('#dialog-content').innerHTML=html;$('#dialog-overlay').hidden=false;}
+function closeDialog(){$('#dialog-overlay').hidden=true;$('#dialog-content').replaceChildren();}
+function setTab(name){$$('.tab').forEach(b=>b.classList.toggle('active',b.dataset.tab===name));$$('.panel-body').forEach(b=>b.classList.toggle('active',b.id===`${name}-panel`));$('#right-panel').classList.add('open');}
+function updateCounts(){const n=(state.book?.annotations||[]).filter(a=>!a.deletedAt).length;$('#notes-count').textContent=n;$('#annotation-count-small').textContent=n;}
+function updateLibrary(){
+  elements.books.replaceChildren();
+  const list=[...state.books].sort((a,b)=>(b.updatedAt||'').localeCompare(a.updatedAt||''));
+  for(const b of list){
+    const btn=document.createElement('button');btn.className='book-item'+(b.id===state.book?.id?' active':'');btn.dataset.id=b.id;
+    const icon=document.createElement('div');icon.className='book-spine';icon.textContent=(b.title||'B').slice(0,1).toUpperCase();
+    const lab=document.createElement('div');lab.style.minWidth='0';const title=document.createElement('span');title.className='book-label';title.textContent=b.title;
+    const sub=document.createElement('small');sub.textContent=`${(b.blocks||[]).length?'Ready':'Source needed'} · ${b.sourceType||'TXT'}`;
+    lab.append(title,sub);btn.append(icon,lab);btn.addEventListener('click',()=>chooseBook(b.id));elements.books.append(btn);
+  }
+}
+function setTitle(){
+  const b=state.book;$('#active-book-title').textContent=b?.title||'Welcome';
+  $('#active-book-title').title=b?.title||'';
+  $('#empty-state').hidden=!!b;$('#book-view').hidden=!b;
+  if(!b)return;
+  $('#article-title').textContent=b.title;$('#source-type').textContent=(b.sourceType||'BOOK').toUpperCase();
+  $('#reader-word-count').textContent=`${(bookText(b).match(/\S+/g)||[]).length.toLocaleString()} words`;
+  document.documentElement.style.setProperty('--reader-size',`${b.fontSize||19}px`);
+}
+async function chooseBook(id){
+  if(state.book?.id===id)return;
+  state.book=state.books.find(b=>b.id===id)||null;state.selection=null;state.playingWord=null;
+  try{localStorage.setItem('margin-last-book',id||'');}catch{}hideSelectionBar();
+  player.setBook(state.book);state.activeTrack=null;state.showNotes=state.book?.visibleNotes!==false;
+  updateLibrary();setTitle();renderReader();renderNotes();renderAudio();renderSearch();$('#sidebar').classList.remove('open');
+  if(state.book?.audioTracks?.length){
+    const first=state.book.audioTracks[0];await setActiveTrack(first.id,false);
+  }
+  if(state.book?.progress?.position>0){const b=findBlock(state.book.progress.position);if(b)setTimeout(()=>scrollToOffset(b.start,false),50);}
+}
+function scheduleSave(markDirty=true){
+  const b=state.book;if(!b)return;
+  b.updatedAt=isoNow();saveStatus('Saving…','warning');
+  clearTimeout(state.saveTimers.get(b.id));
+  state.saveTimers.set(b.id,setTimeout(async()=>{
+    try{await saveBook(b);if(state.book?.id===b.id)saveStatus(storageMode()==='memory'?'Temporary only · Export backup':(gitReady()?'Locally saved · Git pending':'Saved locally'),storageMode()==='memory'?'error':(gitReady()?'warning':''));if(markDirty&&gitReady())scheduleSync(b);}
+    catch(e){if(state.book?.id===b.id)saveStatus('Local save failed','error');toast(`저장 실패: ${e.message}`,true);}
+    finally{state.saveTimers.delete(b.id);}
+  },200));
+}
+function scheduleSync(b=state.book){if(!b)return;clearTimeout(state.syncTimers.get(b.id));state.syncTimers.set(b.id,setTimeout(()=>{state.syncTimers.delete(b.id);syncCurrent(false,b);},18000));}
+async function syncCurrent(manual=true,b=state.book){
+  if(!b){if(manual)openGitSettings();return;}
+  if(!gitReady()){if(manual)openGitSettings();return;}
+  if(state.syncing){if(!manual)scheduleSync(b);else toast('현재 다른 책을 동기화하고 있습니다.');return;}
+  clearTimeout(state.saveTimers.get(b.id));state.saveTimers.delete(b.id);
+  await saveBook(b);state.syncing=true;
+  if(state.book?.id===b.id)saveStatus('Syncing GitHub…','warning');
+  try{
+    await syncBook(b,section=>{if(state.book?.id===b.id)saveStatus('Syncing '+section+'…','warning');});
+    await saveBook(b);
+    if(state.book?.id===b.id){renderReader();renderNotes();renderAudio();saveStatus('Synced to GitHub');}
+    if(manual)toast('GitHub 저장소와 동기화했습니다.');
+  }catch(err){if(state.book?.id===b.id)saveStatus('Git sync failed','error');toast(`GitHub 동기화 실패: ${err.message}`,true);}
+  finally{state.syncing=false;}
+}
+function findBlock(position){return state.book?.blocks?.find(b=>position>=b.start&&position<=b.end)||state.book?.blocks?.find(b=>b.start>=position)||null;}
+function nodeTextSpan(node){if(node.nodeType===Node.TEXT_NODE)return node.parentElement?.closest('.text-piece');return node.nodeType===Node.ELEMENT_NODE?node.closest('.text-piece'):null;}
+function pointOffset(node,index){
+  const span=nodeTextSpan(node);
+  if(span){
+    const base=Number(span.dataset.start);
+    if(node.nodeType===Node.TEXT_NODE)return base+index;
+    const r=document.createRange();r.selectNodeContents(span);try{r.setEnd(node,index);}catch{return null;}
+    return base+r.toString().length;
+  }
+  // Browsers may place a cross-paragraph selection endpoint on an element boundary.
+  if(node.nodeType===Node.ELEMENT_NODE && (node.classList.contains('reading-block')||node.id==='reader-content')){
+    const children=[...node.childNodes];
+    for(let i=index;i<children.length;i++){
+      const next=children[i].nodeType===Node.ELEMENT_NODE?(children[i].matches('.text-piece')?children[i]:children[i].querySelector?.('.text-piece')):null;
+      if(next)return Number(next.dataset.start);
+    }
+    for(let i=Math.min(index-1,children.length-1);i>=0;i--){
+      const prev=children[i].nodeType===Node.ELEMENT_NODE?(children[i].matches('.text-piece')?children[i]:[...children[i].querySelectorAll?.('.text-piece')||[]].at(-1)):null;
+      if(prev)return Number(prev.dataset.start)+prev.textContent.length;
+    }
+  }
+  return null;
+}
+function currentSelection(){
+  if(!state.book)return null;
+  const s=window.getSelection();if(!s||s.isCollapsed||!s.rangeCount)return null;
+  const r=s.getRangeAt(0);
+  let start=pointOffset(r.startContainer,r.startOffset),end=pointOffset(r.endContainer,r.endOffset);
+  if(start===null||end===null||end<=start)return null;
+  const full=bookText(state.book);if(end>full.length)return null;
+  const quote=full.slice(start,end).trim();if(!quote)return null;
+  return {start,end,quote,rect:r.getBoundingClientRect()};
+}
+function hideSelectionBar(){elements.selectionBar.hidden=true;}
+function onUserSelection(){
+  const s=currentSelection();if(!s){hideSelectionBar();return;}
+  state.selection={start:s.start,end:s.end,quote:s.quote};
+  const x=Math.max(10,Math.min(window.innerWidth-275,s.rect.left+s.rect.width/2-125));
+  const y=Math.max(12,Math.min(window.innerHeight-90,s.rect.top-49));
+  elements.selectionBar.style.left=x+'px';elements.selectionBar.style.top=y+'px';elements.selectionBar.hidden=false;
+}
+function renderReader(){
+  const b=state.book;elements.reader.replaceChildren();if(!b)return;
+  if(!b.blocks?.length){const h=document.createElement('div');h.className='help-note';h.textContent='이 책의 원문이 현재 기기에 없습니다. 도서 메뉴에서 동일 파일을 다시 연결하세요.';elements.reader.append(h);return;}
+  const fragment=document.createDocumentFragment();
+  for(const block of b.blocks){const p=document.createElement('p');p.className='reading-block';p.id='block-'+block.id;p.dataset.start=block.start;p.dataset.end=block.end;fragment.append(p);}
+  elements.reader.append(fragment);
+  for(const block of b.blocks)renderBlock(block);
+}
+function renderBlock(block){
+  const el=document.getElementById('block-'+block.id);if(!el||!state.book)return;
+  const a=state.showNotes?activeNotes().filter(x=>x.start<block.end&&x.end>block.start):[];
+  const playback=state.playingWord&&state.playingWord.startChar<block.end&&state.playingWord.endChar>block.start?state.playingWord:null;
+  const cuts=new Set([0,block.text.length]);
+  for(const n of a){cuts.add(Math.max(0,n.start-block.start));cuts.add(Math.min(block.text.length,n.end-block.start));}
+  if(playback){cuts.add(Math.max(0,playback.startChar-block.start));cuts.add(Math.min(block.text.length,playback.endChar-block.start));}
+  const points=[...cuts].sort((x,y)=>x-y);
+  const afterNotes=new Map();
+  for(const n of a){const at=Math.min(block.text.length,n.end-block.start);if(n.end<=block.end&&n.end>block.start){if(!afterNotes.has(at))afterNotes.set(at,[]);afterNotes.get(at).push(n);}}
+  const frag=document.createDocumentFragment();
+  function addNotes(at){for(const n of afterNotes.get(at)||[]){const wrapper=document.createElement('span');wrapper.className='inline-annotation'+(n.collapsed?' collapsed':'');wrapper.dataset.noteid=n.id;wrapper.contentEditable='false';
+      const head=document.createElement('span');head.className='note-top';const category=document.createElement('span');category.textContent=n.category||'Note';
+      const actions=document.createElement('span');actions.className='note-actions';
+      for(const [cmd,symbol,title] of [['collapse',n.collapsed?'▾':'▴','접기·펼치기'],['edit','✎','수정'],['delete','✕','삭제']]){const button=document.createElement('button');button.dataset.noteAction=cmd;button.dataset.noteId=n.id;button.textContent=symbol;button.title=title;actions.append(button);}
+      head.append(category,actions);const body=document.createElement('span');body.className='note-body';body.style.display='block';body.textContent=n.body;wrapper.append(head,body);frag.append(wrapper);
+  }}
+  addNotes(0);
+  for(let i=0;i<points.length-1;i++){
+    const st=points[i],en=points[i+1];if(en>st){const span=document.createElement('span');span.className='text-piece';span.dataset.start=block.start+st;span.textContent=block.text.slice(st,en);
+      if(a.some(n=>n.start<block.start+en&&n.end>block.start+st))span.classList.add('marked');
+      if(playback&&playback.startChar<block.start+en&&playback.endChar>block.start+st)span.classList.add('playing-word');
+      frag.append(span);
+    }
+    addNotes(en);
+  }
+  el.replaceChildren(frag);
+}
+function onPlayingWord(word){const old=state.playingWord;state.playingWord=word;if(!state.book)return;
+  if(old){const b=findBlock(old.startChar);if(b)renderBlock(b);}
+  if(word){const b=findBlock(word.startChar);if(b){renderBlock(b);const el=$('#block-'+b.id);if(el){const rect=el.getBoundingClientRect();if(rect.top<90||rect.top>window.innerHeight-200)el.scrollIntoView({behavior:'smooth',block:'center'});}}}
+}
+function scrollToOffset(position,smooth=true){const b=findBlock(position);if(!b)return;const el=$('#block-'+b.id);el?.scrollIntoView({behavior:smooth?'smooth':'auto',block:'center'});}
+function renderNotes(){
+  updateCounts();const list=$('#notes-list');list.replaceChildren();const filter=$('#note-filter').value.toLowerCase();const notes=(state.book?.annotations||[]).filter(a=>!a.deletedAt).filter(a=>`${noteText(a)} ${a.body} ${a.category}`.toLowerCase().includes(filter)).sort((a,b)=>a.start-b.start);
+  if(!notes.length){list.innerHTML='<div class="empty-mini">아직 작성된 주석이 없거나 검색 결과가 없습니다.</div>';return;}
+  for(const a of notes){const n=document.createElement('div');n.className='side-note';n.dataset.id=a.id;const type=document.createElement('div');type.className='note-category';type.textContent=(a.orphaned?'⚠ 위치 재연결 필요 · ':'')+(a.category||'Note');const q=document.createElement('p');q.className='note-quote';q.textContent='“'+noteText(a).slice(0,150)+'”';const body=document.createElement('div');body.className='note-body';body.textContent=a.body;n.append(type,q,body);n.addEventListener('click',()=>{if(a.orphaned){if(!state.selection){toast('주석을 다시 연결할 원문 구간을 선택한 뒤 주석 목록에서 다시 클릭하세요.',true);return;}a.start=state.selection.start;a.end=state.selection.end;a.quote=state.selection.quote;a.orphaned=false;a.updatedAt=isoNow();scheduleSave();renderReader();renderNotes();toast('주석을 선택한 텍스트에 다시 연결했습니다.');return;}scrollToOffset(a.start);if(!state.showNotes){state.showNotes=true;renderReader();}if(window.innerWidth<650)$('#right-panel').classList.remove('open');});list.append(n);}
+}
+function openAnnotationEditor(existing=null){
+  const s=existing?{start:existing.start,end:existing.end,quote:noteText(existing)}:state.selection;
+  if(!s){toast('원문에서 주석을 달 구간을 먼저 선택하세요.',true);return;}
+  hideSelectionBar();
+  const cats=['Note','Vocabulary','Grammar','Expression','Pronunciation','Question'];
+  showDialog(existing?'Edit annotation':'Add an annotation',`<div class="quote-chip">${E(s.quote.slice(0,400))}</div><label class="field-label">Category<select id="annotation-category" class="text-input">${cats.map(c=>`<option value="${E(c)}" ${existing?.category===c?'selected':''}>${E(c)}</option>`).join('')}</select></label><label class="field-label">My note<textarea class="text-area" id="annotation-body" rows="6" placeholder="문법, 표현, 생각 등을 자유롭게 기록하세요.">${E(existing?.body||'')}</textarea></label><div class="button-row"><button class="secondary-btn" id="ann-cancel">Cancel</button><button class="primary-btn" id="ann-save">Save annotation</button></div>`);
+  $('#ann-cancel').onclick=closeDialog;
+  $('#ann-save').onclick=()=>{
+    const body=$('#annotation-body').value.trim();if(!body){toast('주석 내용을 입력하세요.',true);return;}
+    const category=$('#annotation-category').value;
+    if(existing){existing.body=body;existing.category=category;existing.updatedAt=isoNow();existing.collapsed=false;}
+    else state.book.annotations.push({id:uuid(),start:s.start,end:s.end,quote:s.quote,body,category,collapsed:false,createdAt:isoNow(),updatedAt:isoNow(),deletedAt:null});
+    scheduleSave();renderReader();renderNotes();closeDialog();window.getSelection()?.removeAllRanges();toast('주석이 저장되었습니다.');
+  };
+  setTimeout(()=>$('#annotation-body')?.focus(),50);
+}
+function onNoteAction(event){const btn=event.target.closest('button[data-note-action]');if(!btn)return;
+  event.preventDefault();event.stopPropagation();const note=state.book?.annotations.find(a=>a.id===btn.dataset.noteId);if(!note)return;
+  if(btn.dataset.noteAction==='edit')openAnnotationEditor(note);
+  else if(btn.dataset.noteAction==='delete'){
+    if(!confirm('이 주석을 삭제할까요? GitHub와 동기화하면 삭제 기록도 반영됩니다.'))return;
+    note.deletedAt=isoNow();note.updatedAt=note.deletedAt;scheduleSave();renderReader();renderNotes();toast('주석을 삭제했습니다.');
+  }else if(btn.dataset.noteAction==='collapse'){
+    note.collapsed=!note.collapsed;note.updatedAt=isoNow();scheduleSave();renderReader();renderNotes();
+  }
+}
+function handlePosition(){clearTimeout(positionTimer);positionTimer=setTimeout(()=>{
+    const b=state.book;if(!b?.blocks?.length)return;
+    const box=$('#reader-pane').getBoundingClientRect();
+    const first=b.blocks.find(t=>{const rect=$('#block-'+t.id)?.getBoundingClientRect();return rect && rect.bottom>box.top+45;});
+    if(first&&first.start!==b.progress?.position){b.progress={position:first.start,updatedAt:isoNow()};scheduleSave();}
+  },1000);
+}
+function openImportDialog(){
+  showDialog('Import your reading',`<p>PDF, EPUB, TXT 또는 HTML을 선택하거나 원문을 직접 붙여넣으세요. 파일은 브라우저에 보관하며 Git 저장소에 원문을 자동 업로드하지 않습니다.</p><label class="field-label">Book title<input id="import-title" class="text-input" placeholder="예: The Bodyguard"></label><label class="field-label">Document file<input id="source-file" class="text-input" type="file" accept=".pdf,.epub,.txt,.md,.html,.htm"></label><label class="field-label"><input type="checkbox" id="import-ocr"> 스캔 PDF를 OCR로 인식 (느림, 온라인 모델 다운로드 필요)</label><div style="text-align:center;color:#aaafa4;font-size:11px;margin:15px">— OR PASTE TEXT —</div><textarea id="import-pasted" class="text-area" rows="6" placeholder="Paste English text here..."></textarea><p id="import-status"></p><div class="button-row"><button id="import-cancel" class="secondary-btn">Cancel</button><button id="import-submit" class="primary-btn">Import book</button></div>`);
+  $('#import-cancel').onclick=closeDialog;
+  $('#import-submit').onclick=async()=>{
+    const file=$('#source-file').files?.[0],pasted=$('#import-pasted').value;
+    const title=$('#import-title').value.trim();if(!file&&!pasted.trim()){toast('파일 또는 텍스트를 입력해 주세요.',true);return;}
+    const button=$('#import-submit');button.disabled=true;
+    try{
+      let book;
+      if(file)book=($('#import-ocr').checked&&file.name.toLowerCase().endsWith('.pdf')) ? await ocrPdf(file,s=>$('#import-status').textContent=s) : await importBook(file,s=>$('#import-status').textContent=s);
+      else book=makeBook(title||'Pasted text',pasted,'pasted');
+      if(title)book.title=title;
+      state.books.push(book);await saveBook(book);
+      closeDialog();await chooseBook(book.id);toast('책을 가져왔습니다.');
+    }catch(e){$('#import-status').textContent=e.message;$('#import-status').className='error-text';toast('가져오기 실패: '+e.message,true);}
+    finally{button.disabled=false;}
+  };
+}
+function locateQuote(text,quote,near){
+  if(!quote)return -1;let found=[],at=0;
+  while((at=text.indexOf(quote,at))!==-1){found.push(at);at++;if(found.length>200)break;}
+  return found.length?found.sort((a,b)=>Math.abs(a-near)-Math.abs(b-near))[0]:-1;
+}
+function replaceSource(newText,title=null){
+  if(!state.book)return;const b=state.book;
+  const prev=bookText(b);if(prev===newText){if(title)b.title=title;return;}
+  const next=buildBlocks(newText);const nextCanonical=next.map(x=>x.text).join('\n\n');
+  for(const note of b.annotations||[]){
+    if(note.deletedAt)continue;
+    const quote=note.quote||prev.slice(note.start,note.end);const pos=locateQuote(nextCanonical,quote,note.start);
+    if(pos>=0){note.start=pos;note.end=pos+quote.length;note.orphaned=false;}
+    else note.orphaned=true;
+    note.updatedAt=isoNow();
+  }
+  const nextFingerprint=fingerprint(nextCanonical);
+  const safeReattach=(!b.blocks?.length && b.sourceFingerprint===nextFingerprint);
+  b.blocks=next;b.sourceFingerprint=nextFingerprint;
+  if(!safeReattach){b.wordAlignments={};b.audioMappings=[];b.progress={position:0,updatedAt:isoNow()};}
+  if(title)b.title=title;
+  scheduleSave();setTitle();renderReader();renderNotes();renderAudio();
+}
+function openEditSource(){
+  if(!state.book)return;
+  const b=state.book;
+  showDialog('Edit extracted text',`<p>인식 오류를 수정하거나 동일한 원문 파일을 다시 연결할 수 있습니다. <strong>원문을 변경하면 오디오 타임스탬프는 초기화</strong>되며 기존 주석은 인용 문구를 기준으로 최대한 다시 연결합니다.</p><label class="field-label">Book title<input id="edit-title" class="text-input" value="${E(b.title)}"></label><label class="field-label">Full text<textarea id="edit-full-text" class="text-area" rows="14"></textarea></label><label class="field-label">Reattach source file<input id="reattach-file" class="text-input" type="file" accept=".pdf,.epub,.txt,.md,.html,.htm"></label><p id="edit-status"></p><div class="button-row"><button id="delete-book" class="secondary-btn red">Delete book</button><button id="edit-cancel" class="secondary-btn">Cancel</button><button id="edit-save" class="primary-btn">Save source</button></div>`);
+  $('#edit-full-text').value=bookText(b);
+  $('#edit-cancel').onclick=closeDialog;
+  $('#reattach-file').onchange=async event=>{
+    try{const f=event.target.files?.[0];if(!f)return;const imported=await importBook(f,s=>$('#edit-status').textContent=s);$('#edit-full-text').value=bookText(imported);$('#edit-status').textContent='원문 텍스트를 추출했습니다. Save source를 눌러 연결하세요.';}
+    catch(e){$('#edit-status').textContent=e.message;}
+  };
+  $('#edit-save').onclick=()=>{
+    const newText=$('#edit-full-text').value, newTitle=$('#edit-title').value.trim();if(!newText.trim()){toast('원문이 비어 있습니다.',true);return;}
+    if(bookText(b)!==newText && (activeNotes().length||Object.keys(b.wordAlignments||{}).length)&& !confirm('원문 수정은 기존 오디오 정렬을 삭제하고 주석 위치를 다시 계산합니다. 계속할까요?'))return;
+    replaceSource(newText,newTitle);closeDialog();toast('원문이 저장되었습니다.');
+  };
+  $('#delete-book').onclick=async()=>{
+    if(!confirm(`“${b.title}” 책의 로컬 데이터와 주석을 삭제할까요? GitHub에 이미 업로드된 데이터는 별도로 남습니다.`))return;
+    await removeBook(b.id);for(const a of b.audioTracks||[])await removeAudio(a.id);
+    state.books=state.books.filter(x=>x.id!==b.id);state.book=null;closeDialog();
+    if(state.books.length)await chooseBook(state.books[0].id);
+    else{player.setBook(null);updateLibrary();setTitle();elements.reader.replaceChildren();renderNotes();renderAudio();}
+    toast('이 기기에서 책을 삭제했습니다.');
+  };
+}
+function renderAudio(){
+  const list=$('#audio-list'),times=$('#timings-list');list.replaceChildren();times.replaceChildren();const b=state.book;
+  if(!b){list.innerHTML='<div class="empty-mini">책을 선택하세요.</div>';return;}
+  const tracks=b.audioTracks||[];
+  if(!tracks.length)list.innerHTML='<div class="empty-mini">아직 등록된 오디오 파일이 없습니다.</div>';
+  for(const t of tracks){const item=document.createElement('div');item.className='audio-track'+(t.id===state.activeTrack?' active':'');const lhs=document.createElement('div');lhs.style.minWidth='0';const name=document.createElement('strong');name.textContent=t.name;const info=document.createElement('small');info.textContent=`${((t.size||0)/1024/1024).toFixed(1)} MB`;lhs.append(name,info);const select=document.createElement('button');select.textContent='▶';select.title='이 오디오 선택';select.addEventListener('click',()=>setActiveTrack(t.id));const forget=document.createElement('button');forget.textContent='✕';forget.title='이 기기의 파일만 해제';forget.addEventListener('click',async()=>{await removeAudio(t.id);if(state.activeTrack===t.id)player.setBook(b);toast('오디오 파일만 로컬에서 해제했습니다. 메타데이터는 보관됩니다.');renderAudio();});item.append(lhs,select,forget);list.append(item);}
+  const segments=(b.audioMappings||[]).filter(m=>!m.deletedAt&&m.trackId===state.activeTrack);
+  for(const m of segments){const el=document.createElement('div');el.className='timing-item';const label=document.createElement('span');label.textContent=`${m.start.toFixed(2)}–${m.end.toFixed(2)}s · ${(m.quote||'').slice(0,43)}`;const remove=document.createElement('button');remove.textContent='Delete';remove.onclick=()=>{m.deletedAt=isoNow();m.updatedAt=isoNow();scheduleSave();renderAudio();};el.append(label,remove);times.append(el);}
+  const aligned=(b.wordAlignments||{})[state.activeTrack];if(aligned){const div=document.createElement('div');div.className='help-note';div.textContent=`Auto-aligned: ${aligned.words?.length||0} words · last updated ${new Date(aligned.updatedAt).toLocaleDateString()}`;times.prepend(div);}
+}
+async function setActiveTrack(id,announce=true){
+  if(!state.book)return;
+  state.activeTrack=id;
+  const okay=await player.useTrack(state.book,id);
+  renderAudio();
+  if(okay){
+    const audio=player.audio;
+    const updateEnd=()=>{
+      if(Number.isFinite(audio.duration)&&audio.duration>0){
+        $('#align-start').value='0';
+        $('#align-end').value=String(Math.min(180,Math.floor(audio.duration*10)/10));
+      }
+    };
+    if(audio.readyState>=1)updateEnd();else audio.addEventListener('loadedmetadata',updateEnd,{once:true});
+  }
+  if(announce&&!okay)toast('다른 기기에서 등록한 파일입니다. 동일한 오디오 파일을 다시 업로드해야 합니다.',true);
+}
+async function addAudioFiles(files){
+  const b=state.book;if(!b){toast('먼저 책을 추가하세요.',true);return;}
+  for(const f of files){
+    const existing=b.audioTracks.find(t=>t.name===f.name&&t.size===f.size);
+    const id=existing?.id||uuid();
+    await saveAudio(id,f);
+    if(!existing)b.audioTracks.push({id,name:f.name,type:f.type||'audio/mpeg',size:f.size,duration:null});
+    state.activeTrack=id;
+  }
+  scheduleSave();await setActiveTrack(state.activeTrack);toast(storageMode()==='indexedDB'?`${files.length}개 오디오 파일을 등록했습니다.`:`${files.length}개 음원을 임시 등록했습니다. 브라우저 저장소가 제한되어 새로고침 후 다시 연결해야 합니다.`,storageMode()!=='indexedDB');
+}
+async function playSelection(){
+  if(!state.book)return toast('책을 선택하세요.',true);
+  const sel=state.selection;if(!sel)return toast('원문에서 오디오로 들을 구간을 드래그하세요.',true);
+  hideSelectionBar();
+  if(!state.activeTrack&&state.book.audioTracks.length)await setActiveTrack(state.book.audioTracks[0].id);
+  const pad=Math.max(0,Math.min(3,Number($('#playback-pad').value)||0));const r=await player.playSelection(sel.start,sel.end,pad);
+  if(!r.ok){setTab('audio');toast(r.message,true);}else toast(`선택 구간 재생 (${r.span.type==='manual'?'수동 구간':'단어별 싱크'})`);
+}
+function manualTiming(){
+  const b=state.book,sel=state.selection;if(!b||!sel){toast('원문에서 저장할 구간을 먼저 선택하세요.',true);return;}
+  if(!state.activeTrack){toast('Audiobook 파일을 선택하세요.',true);return;}
+  const start=Number($('#manual-start').value),end=Number($('#manual-end').value);
+  if(!Number.isFinite(start)||!Number.isFinite(end)||end<=start||start<0||$('#manual-start').value===''||$('#manual-end').value===''){toast('시작·종료 시간을 초 단위로 올바르게 입력하세요.',true);return;}
+  const duration=player.audio.duration;if(Number.isFinite(duration)&&end>duration+.3){toast('종료 시간이 오디오 길이를 넘습니다.',true);return;}
+  const existing=b.audioMappings.find(m=>!m.deletedAt&&m.trackId===state.activeTrack&&m.startChar===sel.start&&m.endChar===sel.end);
+  if(existing){existing.start=start;existing.end=end;existing.updatedAt=isoNow();}
+  else b.audioMappings.push({id:uuid(),trackId:state.activeTrack,startChar:sel.start,endChar:sel.end,start,end,quote:sel.quote,updatedAt:isoNow(),deletedAt:null});
+  scheduleSave();renderAudio();toast('선택 구간의 오디오 시간을 저장했습니다.');
+}
+async function alignSelection(){
+  const b=state.book,sel=state.selection;
+  if(!b||!sel){toast('먼저 오디오에 대응하는 영어 본문 범위를 드래그하세요.',true);return;}
+  if(!state.activeTrack){toast('먼저 Audiobook 파일을 선택하세요.',true);return;}
+  const blob=await getAudio(state.activeTrack);
+  if(!blob){toast('이 기기에 오디오 파일이 없습니다. 다시 업로드하세요.',true);return;}
+  const start=Number($('#align-start').value),end=Number($('#align-end').value);
+  if($('#align-start').value.trim()===''||$('#align-end').value.trim()===''||
+     !Number.isFinite(start)||!Number.isFinite(end)||start<0||end<=start){
+    toast('오디오의 시작·종료 시각을 초 단위로 입력하세요.',true);return;
+  }
+  if(end-start>180){toast('브라우저 정렬은 한 번에 180초까지 가능합니다. 더 짧은 구간으로 나누어 주세요.',true);return;}
+  if(!confirm('선택한 영어 원문이 지정된 오디오 구간에 대응하나요? 첫 사용 시 Whisper 모델을 내려받습니다. 오디오 파일은 외부 서버에 업로드하지 않습니다.'))return;
+  const button=$('#auto-align');button.disabled=true;
+  const status=$('#alignment-status');
+  try{
+    const result=await alignAudioInBrowser(blob,bookText(b).slice(sel.start,sel.end),start,end, msg=>status.textContent=msg);
+    if(!result.words.length||result.coverage<0.45)
+      throw new Error(`원문과 음성의 일치율이 ${Math.round(result.coverage*100)}%로 낮아 저장하지 않았습니다. 올바른 구간인지 확인하세요.`);
+    const incoming=result.words.map(w=>({...w,startChar:w.startChar+sel.start,endChar:w.endChar+sel.start}));
+    const previous=b.wordAlignments[state.activeTrack]?.words||[];
+    const old=previous.filter(w=>w.endChar<=sel.start||w.startChar>=sel.end);
+    const warnings=[];
+    if(result.coverage<0.95)warnings.push(`원문 단어 중 ${result.total-incoming.length}개 타임스탬프를 생성하지 못했습니다.`);
+    b.wordAlignments[state.activeTrack]={
+      words:[...old,...incoming].sort((a,c)=>a.startChar-c.startChar),
+      updatedAt:isoNow(),source:'browser-whisper-asr',warnings
+    };
+    scheduleSave();renderAudio();
+    status.textContent=`완료: ${incoming.length}/${result.total}개 단어 연결 (${Math.round(result.coverage*100)}%). 인식된 음성을 비교한 결과이며 정확한 Forced Alignment는 아닙니다. 실제로 들어보고 보정하세요.`;
+    toast(`브라우저에서 ${incoming.length}개 단어를 연결했습니다.`);
+  }catch(e){status.textContent='정렬 실패: '+e.message;toast('자동 정렬 실패: '+e.message,true);}
+  finally{button.disabled=false;}
+}
+function renderSearch(){const list=$('#search-results');list.replaceChildren();const q=$('#document-search').value.trim();if(!state.book||!q){list.innerHTML='<div class="empty-mini">검색어를 입력하세요.</div>';return;}
+  const text=bookText(state.book);let pos=0,n=0;const lq=q.toLowerCase(),lt=text.toLowerCase();
+  while((pos=lt.indexOf(lq,pos))!==-1&&n<70){const hit=document.createElement('div');hit.className='search-hit';
+    hit.textContent='…'+text.slice(Math.max(0,pos-48),pos)+'【'+text.slice(pos,pos+q.length)+'】'+text.slice(pos+q.length,pos+q.length+55)+'…';
+    const target=pos;hit.onclick=()=>{scrollToOffset(target);if(window.innerWidth<650)$('#right-panel').classList.remove('open');};list.append(hit);pos+=q.length;n++;
+  }
+  if(!n)list.innerHTML='<div class="empty-mini">검색 결과가 없습니다.</div>';
+}
+function openGitSettings(){
+  const cfg=getGitConfig();
+  showDialog('GitHub sync settings',`<p>개인 학습 데이터는 별도 <strong>Private Repository</strong>에 저장합니다. 원서 PDF·EPUB·오디오 파일은 Git에 올리지 않습니다. 접근 토큰은 브라우저 메모리에만 유지되며 새로고침 시 다시 입력해야 합니다.</p><label class="field-label">GitHub owner<input id="git-owner" class="text-input" value="${E(cfg.owner)}" placeholder="your-username"></label><label class="field-label">Data repository<input id="git-repo" class="text-input" value="${E(cfg.repo)}" placeholder="english-reader-data"></label><label class="field-label">Branch<input id="git-branch" class="text-input" value="${E(cfg.branch)}" placeholder="main"></label><label class="field-label">Fine-grained access token (contents: read & write)<input id="git-token" class="text-input" type="password" autocomplete="off" placeholder="Paste short-lived token (not stored)"></label><p>브라우저에서 GitHub API를 직접 호출합니다. 기기의 보안을 신뢰할 수 있을 때만 토큰을 입력하세요. 토큰을 소스 코드, URL, Git 커밋에 넣지 마세요.</p><div class="button-row" style="flex-wrap:wrap"><button class="secondary-btn" id="git-disconnect">Forget token</button><button class="secondary-btn" id="git-restore">Restore library</button><button class="secondary-btn" id="git-history">Revision history</button><button class="primary-btn" id="git-save">Connect & sync</button></div><p id="git-status" role="status"></p>`);
+  $('#git-save').onclick=async()=>{
+    try{
+      const secret=$('#git-token').value;
+      if(!secret&&!getGitConfig().authenticated)throw new Error('GitHub 토큰을 입력하세요.');
+      // An in-memory token may be reused within the session without asking for re-entry.
+      if(secret)setGitConfig({owner:$('#git-owner').value,repo:$('#git-repo').value,branch:$('#git-branch').value},secret);
+      else if($('#git-owner').value!==cfg.owner||$('#git-repo').value!==cfg.repo||$('#git-branch').value!==cfg.branch)throw new Error('연결 정보를 변경했다면 토큰을 다시 입력하세요.');
+      $('#git-status').textContent='GitHub에 저장 중…';
+      if(state.book)await syncCurrent(true);else await listRemoteBooks();
+      $('#git-status').textContent='연결되었습니다. 18초 동안 변경이 없으면 자동 동기화합니다.';toast('GitHub 연결되었습니다.');
+    }catch(e){$('#git-status').textContent=e.message;toast(e.message,true);}
+  };
+  $('#git-disconnect').onclick=()=>{clearGitToken();$('#git-token').value='';$('#git-status').textContent='토큰을 메모리에서 해제했습니다.';saveStatus('Saved locally');};
+  $('#git-history').onclick=()=>openGitHistory();
+  $('#git-restore').onclick=async()=>{
+    try{
+      if($('#git-token').value)setGitConfig({owner:$('#git-owner').value,repo:$('#git-repo').value,branch:$('#git-branch').value},$('#git-token').value);
+      if(!gitReady())throw new Error('접근 토큰과 저장소 주소를 입력하세요.');
+      const list=await listRemoteBooks();if(!list.length){$('#git-status').textContent='원격 도서 목록이 없습니다.';return;}
+      $('#git-status').textContent=`${list.length}권 원격 데이터 불러오는 중…`;
+      let count=0;
+      for(const remote of list){
+        const metadata=await pullRemoteBook(remote.id);
+        let local=state.books.find(b=>b.id===remote.id);
+        if(!local){local=makeBook(remote.title||'Remote book','',remote.sourceType||'unknown');local.id=remote.id;local.title=remote.title;local.blocks=[];state.books.push(local);}
+        for(const section of ['annotations','progress','alignment']){
+          const data=metadata[section];if(!data)continue;
+          if(data.sourceFingerprint&&!local.blocks?.length)local.sourceFingerprint=data.sourceFingerprint;
+          if(section==='annotations')local.annotations=mergeById(local.annotations||[],data.annotations||[]);
+          if(section==='progress')local.progress=mergeProgress(local.progress||{},data.progress||{});
+          if(section==='alignment'){
+            local.audioMappings=mergeById(local.audioMappings||[],data.audioMappings||[]);
+            local.wordAlignments=mergeAlignment(local.wordAlignments||{},data.wordAlignments||{});
+            const seen=new Set(local.audioTracks.map(x=>x.id));
+            for(const a of data.audioTracks||[])if(!seen.has(a.id))local.audioTracks.push(a);
+          }
+        }
+        await saveBook(local);count++;
+      }
+      updateLibrary();closeDialog();if(!state.book&&state.books[0])await chooseBook(state.books[0].id);else{renderReader();renderNotes();renderAudio();}
+      toast(`${count}권의 원격 학습 기록을 불러왔습니다. 원문·오디오는 기기에서 다시 연결해야 할 수 있습니다.`);
+    }catch(e){$('#git-status').textContent='복원 실패: '+e.message;toast(e.message,true);}
+  };
+}
+function openGitHistory(){
+  if(!gitReady())return toast('먼저 GitHub를 연결하세요.',true);
+  const b=state.book;if(!b)return toast('복구할 책을 선택하세요.',true);
+  showDialog('Git revision history',`<p>GitHub에 저장된 이전 커밋을 탐색하고 이 책의 메모·읽기 진도·정렬 데이터를 복원할 수 있습니다. 복원 시 로컬 최신 데이터도 변경되므로 백업을 권장합니다.</p><label class="field-label">Data section<select id="history-section" class="text-input"><option value="annotations">Annotations</option><option value="progress">Reading progress</option><option value="alignment">Audio alignment</option></select></label><button id="history-load" class="secondary-btn wide">Load revisions</button><div id="history-list"></div><p id="history-status"></p>`);
+  $('#history-load').onclick=async()=>{
+    const section=$('#history-section').value;const container=$('#history-list');container.textContent='Loading…';
+    try{
+      const revisions=await listHistory(b.id,section);container.replaceChildren();
+      if(!revisions.length){container.textContent='저장된 이전 커밋이 없습니다.';return;}
+      for(const r of revisions){const row=document.createElement('div');row.className='timing-item';
+        const info=document.createElement('span');info.textContent=`${r.date.slice(0,16).replace('T',' ')} · ${r.message.slice(0,50)}`;
+        const btn=document.createElement('button');btn.textContent='Restore';btn.addEventListener('click',async()=>{
+          if(!confirm('이 버전의 데이터로 복원할까요? 복원 전에 Export backup을 권장합니다.'))return;
+          try{
+            const snapshot=await getRevision(b.id,section,r.sha);if(!snapshot)throw new Error('선택한 버전을 읽을 수 없습니다.');const stamp=isoNow();
+            if(section==='annotations'){
+              const old=b.annotations||[];const restored=snapshot.annotations||[];const oldIds=new Set(restored.map(a=>a.id));
+              b.annotations=[...restored.map(a=>({...a,updatedAt:stamp,deletedAt:a.deletedAt||null})),...old.filter(a=>!oldIds.has(a.id)).map(a=>({...a,updatedAt:stamp,deletedAt:stamp}))];
+            }else if(section==='progress')b.progress={...(snapshot.progress||{}),updatedAt:stamp};
+            else if(section==='alignment'){
+              const restored=snapshot.audioMappings||[];const ids=new Set(restored.map(a=>a.id));
+              b.audioMappings=[...restored.map(a=>({...a,updatedAt:stamp})),...(b.audioMappings||[]).filter(a=>!ids.has(a.id)).map(a=>({...a,updatedAt:stamp,deletedAt:stamp}))];
+              const align={};for(const id of new Set([...Object.keys(b.wordAlignments||{}),...Object.keys(snapshot.wordAlignments||{})]))align[id]={...(snapshot.wordAlignments?.[id]||{words:[]}),updatedAt:stamp};
+              b.wordAlignments=align;
+            }
+            scheduleSave();renderReader();renderNotes();renderAudio();closeDialog();toast('Git 커밋에서 복원했습니다. 다음 Git sync로 변경을 업로드할 수 있습니다.');
+          }catch(e){$('#history-status').textContent=e.message;}
+        });row.append(info,btn);container.append(row);}
+    }catch(e){container.textContent='이력 조회 실패: '+e.message;}
+  };
+}
+async function exportBackup(){const books=await listBooks();const data={format:'margin-backup-v1',exportedAt:isoNow(),books};
+  download('margin-reading-backup-'+new Date().toISOString().slice(0,10)+'.json',JSON.stringify(data,null,2));toast('원문·주석·설정 백업을 내보냈습니다. 오디오 파일은 포함되지 않습니다.');}
+async function importBackupFile(file){
+  if(!file)return;if(file.size>50*1024*1024){toast('백업 파일 크기는 50MB 이하여야 합니다.',true);return;}
+  let data;
+  try{data=JSON.parse(await file.text());if(data.format!=='margin-backup-v1'||!Array.isArray(data.books))throw new Error('지원하지 않는 백업 형식입니다.');
+    for(const b of data.books){if(!b.id||!Array.isArray(b.blocks)||!Array.isArray(b.annotations))throw new Error('손상된 책 데이터가 있습니다.');
+      const prev=state.books.find(x=>x.id===b.id);if(prev){prev.annotations=mergeById(prev.annotations,b.annotations);prev.audioMappings=mergeById(prev.audioMappings,b.audioMappings||[]);prev.wordAlignments=mergeAlignment(prev.wordAlignments,b.wordAlignments||{});prev.progress=mergeProgress(prev.progress,b.progress||{});if(!prev.blocks.length&&b.blocks.length)prev.blocks=b.blocks;await saveBook(prev);}
+      else{state.books.push(b);await saveBook(b);}
+    }
+    updateLibrary();if(!state.book&&state.books.length)await chooseBook(state.books[0].id);else if(state.book){renderReader();renderNotes();renderAudio();}
+    toast(`${data.books.length}권의 백업 데이터를 가져왔습니다.`);
+  }catch(e){toast('백업 가져오기 실패: '+e.message,true);}
+}
+async function copySelection(){if(!state.selection)return;try{await navigator.clipboard.writeText(state.selection.quote);toast('선택한 문장을 복사했습니다.');}catch{toast('복사 권한이 필요합니다.',true);}hideSelectionBar();}
+function bindEvents(){
+  for(const sel of ['#import-open','#open-import','#welcome-import'])$(sel).onclick=openImportDialog;
+  $('#load-sample').onclick=async()=>{const text=`It was still raining when I left the bookshop.\n\nI had planned to go straight home, but I ran into an old friend near the station. We ended up talking for almost an hour.\n\n"You should drop by sometime," she said. "I'd love to catch up."\n\nI almost turned down her invitation. Then I thought, why not? Sometimes the smallest decisions change the course of your day.\n\nBy the time I got home, the rain had stopped and the city looked completely different.`;const b=makeBook('A Rainy Afternoon',text,'sample');state.books.push(b);await saveBook(b);await chooseBook(b.id);toast('연습용 짧은 글을 불러왔습니다.');};
+  $('#menu-toggle').onclick=()=>$('#sidebar').classList.toggle('open');
+  $('#notes-toggle').onclick=()=>$('#right-panel').classList.toggle('open');
+  $('#panel-close').onclick=()=>$('#right-panel').classList.remove('open');
+  $$('.tab').forEach(b=>b.onclick=()=>setTab(b.dataset.tab));
+  $('#dialog-close').onclick=closeDialog;$('#dialog-overlay').onclick=e=>{if(e.target.id==='dialog-overlay')closeDialog();};
+  $('#selection-annotate').onclick=()=>openAnnotationEditor();$('#selection-play').onclick=playSelection;$('#selection-copy').onclick=copySelection;
+  elements.reader.addEventListener('click',onNoteAction);
+  elements.reader.addEventListener('mouseup',()=>setTimeout(onUserSelection,0));
+  elements.reader.addEventListener('keyup',()=>setTimeout(onUserSelection,0));
+  document.addEventListener('mousedown',e=>{if(!e.target.closest('#selection-toolbar,.reader-content'))hideSelectionBar();});
+  $('#note-filter').oninput=renderNotes;$('#document-search').oninput=renderSearch;
+  $('#audio-upload').onchange=async e=>{try{await addAudioFiles([...e.target.files]);}catch(err){toast('오디오 저장 실패: '+err.message,true);}e.target.value='';};
+  $('#manual-start').addEventListener('focus',()=>hideSelectionBar());
+  $('#manual-end').addEventListener('focus',()=>hideSelectionBar());
+  $('#save-manual').onclick=manualTiming;$('#auto-align').onclick=alignSelection;
+  $('#player-selection').onclick=playSelection;
+  $('#decrease-font').onclick=()=>{if(!state.book)return;state.book.fontSize=Math.max(14,(state.book.fontSize||19)-1);setTitle();scheduleSave();};
+  $('#increase-font').onclick=()=>{if(!state.book)return;state.book.fontSize=Math.min(30,(state.book.fontSize||19)+1);setTitle();scheduleSave();};
+  $('#toggle-annotations').onclick=()=>{state.showNotes=!state.showNotes;if(state.book){state.book.visibleNotes=state.showNotes;scheduleSave();}renderReader();toast(state.showNotes?'주석 표시':'주석 숨김');};
+  $('#edit-source').onclick=openEditSource;
+  $('#open-settings').onclick=openGitSettings;$('#open-git-sync').onclick=()=>gitReady()?syncCurrent(true):openGitSettings();
+  $('#export-all').onclick=exportBackup;
+  $('#import-backup').onchange=async e=>{await importBackupFile(e.target.files?.[0]);e.target.value='';};
+  $('#reader-pane').addEventListener('scroll',handlePosition);
+  document.addEventListener('keydown',e=>{
+    if(e.key==='Escape'){closeDialog();hideSelectionBar();$('#sidebar').classList.remove('open');$('#right-panel').classList.remove('open');}
+    if(e.target.closest('input,textarea,select,[contenteditable]'))return;
+    if(e.key.toLowerCase()==='n'&&state.selection){e.preventDefault();openAnnotationEditor();}
+    if(e.key.toLowerCase()==='p'&&state.selection){e.preventDefault();playSelection();}
+    if(e.code==='Space'&&player.audio.src){e.preventDefault();$('#player-play').click();}
+  });
+}
+async function boot(){
+  try{state.books=await listBooks();if(storageMode()==='memory')toast('브라우저 저장이 제한되어 학습 기록이 임시로만 유지됩니다. Git 동기화 또는 JSON 백업을 이용하세요.',true);}catch(e){toast('브라우저 저장소를 열지 못했습니다: '+e.message,true);}
+  for(const book of state.books){book.audioTracks||=[];book.audioMappings||=[];book.wordAlignments||={};book.annotations||=[];book.blocks||=[];book.progress||={position:0,updatedAt:isoNow()};}
+  bindEvents();updateLibrary();
+  if(state.books.length){let remembered='';try{remembered=localStorage.getItem('margin-last-book')||'';}catch{}await chooseBook(state.books.find(b=>b.id===remembered)?.id||state.books[0].id);}
+  else{setTitle();renderNotes();renderAudio();}
+  if('serviceWorker' in navigator && location.protocol==='https:')navigator.serviceWorker.register('./sw.js').catch(()=>{});
+}
+boot();
+
+</script>
+</body>
+</html>
