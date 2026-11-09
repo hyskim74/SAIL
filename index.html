@@ -799,9 +799,9 @@ function setSidebarCollapsed(collapsed,persist=true){
 function setTab(name){
  if(!sidebarSections.has(name))return;
  $('#sidebar').dataset.section=name;
- $('.sidebar-nav-btn').forEach(b=>{const active=b.dataset.section===name;b.classList.toggle('active',active);b.setAttribute('aria-current',active?'page':'false');});
- $('.tab').forEach(b=>b.classList.toggle('active',b.dataset.tab===name));
- $('.panel-body').forEach(b=>b.classList.toggle('active',b.id===name+'-panel'));
+ $$('.sidebar-nav-btn').forEach(b=>{const active=b.dataset.section===name;b.classList.toggle('active',active);b.setAttribute('aria-current',active?'page':'false');});
+ $$('.tab').forEach(b=>b.classList.toggle('active',b.dataset.tab===name));
+ $$('.panel-body').forEach(b=>b.classList.toggle('active',b.id===name+'-panel'));
  $('#sidebar-panel-title').textContent=({library:'Library',notes:'Annotations',audio:'Audiobook',search:'Search'})[name];
  $('#annotation-count-small').hidden=name!=='notes';
  setSidebarCollapsed(false);
@@ -1422,8 +1422,8 @@ function bindEvents(){
   $('#notes-toggle').onclick=()=>setTab('notes');
   $('#panel-close').onclick=()=>setSidebarCollapsed(true);
   $('#sidebar-collapse').onclick=()=>setSidebarCollapsed(!$('#sidebar').classList.contains('collapsed'));
-  $('.sidebar-nav-btn').forEach(b=>b.onclick=()=>setTab(b.dataset.section));
-  $('.tab').forEach(b=>b.onclick=()=>setTab(b.dataset.tab));
+  $$('.sidebar-nav-btn').forEach(b=>b.onclick=()=>setTab(b.dataset.section));
+  $$('.tab').forEach(b=>b.onclick=()=>setTab(b.dataset.tab));
   $('#dialog-close').onclick=closeDialog;$('#dialog-overlay').onclick=e=>{if(e.target.id==='dialog-overlay')closeDialog();};
   $('#selection-annotate').onclick=()=>openAnnotationEditor();$('#selection-play').onclick=playSelection;$('#selection-copy').onclick=copySelection;
   elements.reader.addEventListener('click',onNoteAction);
