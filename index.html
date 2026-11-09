@@ -136,7 +136,7 @@ function selectedTimeSpan(words,start,end) {
   return {start:Math.min(...overlapping.map(w=>w.start)),end:Math.max(...overlapping.map(w=>w.end)),count:overlapping.length};
 }
 function locallySaveableBook(book) {
-  return {...book, audioTracks:(book.audioTracks||[]).map(({id,name,type,size,duration})=>({id,name,type,size,duration}))};
+  return {...book, audioTracks:(book.audioTracks||[]).map(({id,name,type,size,duration,remote})=>({id,name,type,size,duration,...(remote?{remote}:{})}))};
 }
 function gitDataset(book) {
   return {
@@ -233,7 +233,7 @@ async function githubApi(endpoint,options={}){
 const github=(path,options={})=>githubApi(`contents/${path}`,options);
 function utf8B64(s){const bytes=new TextEncoder().encode(s);let binary='';for(let i=0;i<bytes.length;i+=32768)binary+=String.fromCharCode(...bytes.slice(i,i+32768));return btoa(binary);}
 function decodeB64(s){const binary=atob(s.replace(/\s/g,''));const bytes=Uint8Array.from(binary,c=>c.charCodeAt(0));return new TextDecoder().decode(bytes);}
-const filepath=(id,type)=>`books/${encodeURIComponent(id)}/${type}.json`;
+const filepath=(id,type)=>`notes/books/${encodeURIComponent(id)}/${type}.json`;
 async function getJSON(path,ref=config.branch){const result=await github(`${path}?ref=${encodeURIComponent(ref)}`);if(!result)return {sha:null,data:null};
   if(result.type!=='file')throw new Error('GitHub 경로가 파일이 아닙니다.');
   let content=result.content;
@@ -268,16 +268,16 @@ async function syncBook(book,onStep=()=>{}){
 }
 async function updateIndex(entries){
   for(let attempt=0;attempt<3;attempt++){
-    const remote=await getJSON('index.json');
+    const remote=await getJSON('notes/index.json');
     const existing=remote.data?.books||[];
     const merged=mergeById(entries,existing);
     const data={version:1,books:merged};
     if(sortedJson(data)===sortedJson(remote.data))return data;
-    try{await putJSON('index.json',data,remote.sha,'Update reading library index');return data;}
+    try{await putJSON('notes/index.json',data,remote.sha,'Update reading library index');return data;}
     catch(e){if((e.status===409||e.status===422)&&attempt<2)continue;throw e;}
   }
 }
-async function listRemoteBooks(){return (await getJSON('index.json')).data?.books||[];}
+async function listRemoteBooks(){return (await getJSON('notes/index.json')).data?.books||[];}
 async function pullRemoteBook(id){
   const out={};for(const s of ['annotations','progress','alignment'])out[s]=(await getJSON(filepath(id,s))).data;
   return out;
