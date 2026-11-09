@@ -100,9 +100,9 @@
         <section id="search-panel" class="panel-body"><div class="help-note">원문에서 단어나 표현을 검색합니다.</div><input id="document-search" class="text-input" placeholder="Search in this book"><div id="search-results" class="notes-list"></div></section>
       </aside>
     <div class="sidebar-bottom">
-      <button id="open-import" class="side-action"><span>⊕</span> Import a book</button>
-      <button id="open-settings" class="side-action"><span>⚙</span> Settings & sync</button>
-      <button id="export-all" class="side-action"><span>⇩</span> Export backup</button>
+      <button id="open-import" class="side-action" title="Import a book"><span>⊕</span> Import a book</button>
+      <button id="open-settings" class="side-action" title="Settings & sync"><span>⚙</span> Settings & sync</button>
+      <button id="export-all" class="side-action" title="Export backup"><span>⇩</span> Export backup</button>
       <label class="side-action file-action"><span>⇧</span> Import backup<input id="import-backup" type="file" accept="application/json,.json" hidden></label>
     </div>
   </aside>
@@ -1386,7 +1386,8 @@ async function boot(){
   try{state.books=await listBooks();if(storageMode()==='memory')toast('브라우저 저장이 제한되어 학습 기록이 임시로만 유지됩니다. Git 동기화 또는 JSON 백업을 이용하세요.',true);}catch(e){toast('브라우저 저장소를 열지 못했습니다: '+e.message,true);}
   for(const book of state.books){book.audioTracks||=[];book.audioMappings||=[];book.wordAlignments||={};book.annotations||=[];book.blocks||=[];book.progress||={position:0,updatedAt:isoNow()};}
   bindEvents();
-  try{setSidebarCollapsed(localStorage.getItem('margin-sidebar-collapsed')==='1',false);}catch{setSidebarCollapsed(false,false);}
+  if(window.innerWidth>900){try{setSidebarCollapsed(localStorage.getItem('margin-sidebar-collapsed')==='1',false);}catch{setSidebarCollapsed(false,false);}}
+  else $('#sidebar').classList.remove('open','collapsed');
   updateLibrary();
   if(state.books.length){let remembered='';try{remembered=localStorage.getItem('margin-last-book')||'';}catch{}await chooseBook(state.books.find(b=>b.id===remembered)?.id||state.books[0].id);}
   else{setTitle();renderNotes();renderAudio();restoreStoredSyncProgress();}
