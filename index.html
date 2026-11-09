@@ -96,6 +96,66 @@
     width:100%;
   }
 }
+
+/* Compact, higher-contrast sidebar utility actions */
+.sidebar .sidebar-bottom{
+  flex:none;
+  padding-top:5px;
+  max-height:160px;
+  overflow-y:auto;
+}
+.sidebar .sidebar-bottom .side-action{
+  color:#405148;
+  font-size:13px;
+  font-weight:650;
+  line-height:1.25;
+  display:flex;
+  align-items:center;
+  gap:9px;
+  width:100%;
+  min-height:36px;
+  margin:0;
+  padding:7px 9px;
+  border-radius:7px;
+}
+.sidebar .sidebar-bottom .side-action:hover,
+.sidebar .sidebar-bottom .side-action:focus-visible{
+  background:#e1e8df;
+  color:#273f31;
+}
+.sidebar .sidebar-bottom .side-action span{
+  flex:0 0 17px;
+  width:17px;
+  font-size:17px;
+  line-height:1;
+  color:#57685c;
+}
+.sidebar.collapsed .sidebar-bottom{
+  max-height:160px;
+  padding-top:5px;
+}
+.sidebar.collapsed .sidebar-bottom .side-action{
+  justify-content:center;
+  gap:0;
+  min-height:36px;
+  padding:7px 0;
+  font-size:0;
+}
+.sidebar.collapsed .sidebar-bottom .side-action span{
+  margin:0;
+  font-size:19px;
+}
+@media(max-width:900px){
+  .sidebar.open .sidebar-bottom .side-action{
+    font-size:13px;
+    justify-content:flex-start;
+    gap:9px;
+    padding:7px 9px;
+  }
+  .sidebar.open .sidebar-bottom .side-action span{
+    font-size:17px;
+  }
+}
 </style>
 </head>
 <body>
