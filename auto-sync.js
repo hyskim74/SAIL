@@ -110,7 +110,7 @@ export class BrowserAudioSampler{
   }
   async close(){this.pendingStop?.();this.media?.pause();if(this.processor)this.processor.onaudioprocess=null;try{await this.ctx?.close();}catch{}if(this.url)URL.revokeObjectURL(this.url);this.media?.removeAttribute('src');this.media?.load();}
 }
-export async function discoverAndSync({text,bodyStart,tracks,loadBlob,transcribe,progress=()=>{},save=async()=>{},signal,startingState=null}){
+export async function discoverAndSync({text,bodyStart,tracks,loadBlob,transcribe,progress=()=>{},onMetrics=()=>{},save=async()=>{},signal,startingState=null}){
   const anchor=tokensOf(text.slice(bodyStart)).slice(0,26);
   if(anchor.length<8)throw new Error('본문 시작 표시 뒤에 최소 8개 이상의 영어 단어가 필요합니다.');
   const anchorText=text.slice(bodyStart,bodyStart+anchor.at(-1).endChar);
@@ -119,16 +119,18 @@ export async function discoverAndSync({text,bodyStart,tracks,loadBlob,transcribe
   const first=found?Math.max(0,tracks.findIndex(t=>t.id===foundTrack)):0;
   for(let index=first;index<tracks.length;index++){
     check(signal);const track=tracks[index],blob=await loadBlob(track);
-    if(!blob){progress('이 기기에 오디오 파일이 없습니다: '+track.name+' · Private Data에서 복원하세요.');continue;}
+    if(!blob){progress('이 기기에 오디오 파일이 없습니다: '+track.name+' · Private Data에서 복원하세요.');onMetrics({phase:'missing',trackId:track.id,trackName:track.name,trackIndex:index+1,trackCount:tracks.length,bodyStart,cursor,totalChars:text.length});continue;}
     const sampler=new BrowserAudioSampler(blob,signal);
     try{
       const duration=await sampler.open();
+      onMetrics({phase:found?'align':'search',trackId:track.id,trackName:track.name,trackIndex:index+1,trackCount:tracks.length,audioPosition:0,audioDuration:duration,bodyStart,cursor,totalChars:text.length});
       let pos=found&&track.id===foundTrack?(startingState?.nextAudio??0):0;
       const step=found?CLIP-3:SEARCH_STEP;
       while(pos<duration-.2){
         check(signal);
         const end=Math.min(duration,pos+CLIP);
         progress((found?'단어 정렬: ':'본문 시작 자동 검색: ')+track.name+' · '+Math.floor(pos)+' / '+Math.floor(duration)+'초');
+        onMetrics({phase:found?'align':'search',trackId:track.id,trackName:track.name,trackIndex:index+1,trackCount:tracks.length,audioPosition:pos,audioDuration:duration,bodyStart,cursor,totalChars:text.length,aligned});
         const wave=await sampler.clip(pos,end);check(signal);
         const result=await transcribe(wave);check(signal);
         const chunks=Array.isArray(result)?result:(result?.chunks||[]);
@@ -136,14 +138,17 @@ export async function discoverAndSync({text,bodyStart,tracks,loadBlob,transcribe
           const hit=identifyAnchor(anchorText,chunks);
           if(hit){found=true;foundTrack=track.id;foundAt=pos+hit.audioStart;cursor=bodyStart;
             progress('본문 시작 발견: '+track.name+' · '+foundAt.toFixed(1)+'초. 자동 정렬 시작.');
+            onMetrics({phase:'align',trackId:track.id,trackName:track.name,trackIndex:index+1,trackCount:tracks.length,audioPosition:pos,audioDuration:duration,bodyStart,cursor,totalChars:text.length,aligned});
           }
         }
         if(found){
           const matched=alignNextWindow(text,bodyStart,cursor,chunks,pos);
           cursor=Math.max(cursor,matched.cursor);aligned+=matched.words.length;
           await save({trackId:track.id,words:matched.words,scan:{found:true,trackId:track.id,audioStart:foundAt,nextAudio:Math.max(pos+step,end-3),cursor,updatedAt:new Date().toISOString(),complete:false}});
+          onMetrics({phase:'align',trackId:track.id,trackName:track.name,trackIndex:index+1,trackCount:tracks.length,audioPosition:end,audioDuration:duration,bodyStart,cursor,totalChars:text.length,aligned});
           if(cursor>=text.length-2){
             await save({trackId:track.id,words:[],scan:{found:true,trackId:track.id,audioStart:foundAt,nextAudio:end,cursor,updatedAt:new Date().toISOString(),complete:true}});
+            onMetrics({phase:'complete',trackId:track.id,trackName:track.name,trackIndex:index+1,trackCount:tracks.length,audioPosition:end,audioDuration:duration,bodyStart,cursor:Math.max(cursor,text.length),totalChars:text.length,aligned});
             return {found,foundTrack,foundAt,cursor,aligned,complete:true};
           }
         }
