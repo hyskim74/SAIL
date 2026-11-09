@@ -191,7 +191,7 @@ export class BrowserAudioSampler{
     this.media?.removeAttribute('src');this.media?.load();
   }
 }
-export async function discoverAndSync({text,bodyStart,tracks,loadBlob,transcribe,progress=()=>{},onMetrics=()=>{},save=async()=>{},signal,startingState=null}){
+export async function discoverAndSync({text,bodyStart,tracks,loadBlob,transcribe,progress=()=>{},onMetrics=()=>{},save=async()=>{},signal,startingState=null,workerCount=1}){
   const anchor=tokensOf(text.slice(bodyStart)).slice(0,26);
   if(anchor.length<8)throw new Error('본문 시작 표시 뒤에 최소 8개 이상의 영어 단어가 필요합니다.');
   const anchorText=text.slice(bodyStart,bodyStart+anchor.at(-1).endChar);
@@ -221,49 +221,86 @@ export async function discoverAndSync({text,bodyStart,tracks,loadBlob,transcribe
         decoderMode:sampler.mode,decodeMs,asrMs,matchMs,segments,...extra
       });
       metrics(found?'align':'search',pos);
+      const lanes=Math.max(1,Math.min(2,Math.floor(Number(workerCount)||1)));
       while(pos<duration-.2){
         check(signal);
-        const step=found?CLIP-3:SEARCH_STEP;
-        const end=Math.min(duration,pos+CLIP);
-        progress((found?'단어 정렬: ':'본문 시작 자동 검색: ')+track.name+' · '+Math.floor(pos)+' / '+Math.floor(duration)+'초');
-        metrics(found?'align':'search',pos);
-        let started=clock();
-        const wave=await sampler.clip(pos,end);check(signal);
-        decodeMs+=clock()-started;
-        started=clock();
-        const result=await transcribe(wave);check(signal);
-        asrMs+=clock()-started;
-        const chunks=Array.isArray(result)?result:(result?.chunks||[]);
-        started=clock();
-        if(!found){
-          const hit=identifyAnchor(anchorText,chunks);
-          if(hit){
-            found=true;foundTrack=track.id;foundAt=pos+hit.audioStart;cursor=bodyStart;
-            progress('본문 시작 발견: '+track.name+' · '+foundAt.toFixed(1)+'초. 자동 정렬 시작.');
-            metrics('align',pos);
+        const batch=[];
+        let nextPos=pos;
+        try{
+          // Decode sequentially through ONE sampler, but start ASR as soon as each
+          // clip is available. With two independent ASR pipelines, recognition
+          // overlaps and results are committed in strictly increasing audio order.
+          for(let lane=0;lane<lanes&&nextPos<duration-.2;lane++){
+            check(signal);
+            const at=nextPos,until=Math.min(duration,at+CLIP);
+            const stride=found?CLIP-3:SEARCH_STEP;
+            nextPos=Math.min(duration,at+stride);
+            progress((found?'단어 정렬: ':'본문 시작 자동 검색: ')+track.name+' · '+Math.floor(at)+' / '+Math.floor(duration)+'초 · '+lanes+'개 병렬');
+            metrics(found?'align':'search',at,{parallelism:lanes});
+            const started=clock();
+            const wave=await sampler.clip(at,until);
+            check(signal);decodeMs+=clock()-started;
+            const transcribeStarted=clock();
+            // Resolve AND reject into a value immediately; no unhandled rejected
+            // job is left behind when a later audio decode fails or is cancelled.
+            const task=Promise.resolve().then(()=>transcribe(wave,lane)).then(
+              result=>({result,elapsed:clock()-transcribeStarted}),
+              error=>({error,elapsed:clock()-transcribeStarted})
+            );
+            batch.push({at,until,task});
           }
+        }catch(err){
+          // Do not release the model or allow a fresh run while prior ASR tasks
+          // are still using it.
+          await Promise.all(batch.map(x=>x.task));
+          throw err;
         }
-        let matched={words:[],cursor};
-        if(found){
-          matched=alignNextWindow(text,bodyStart,cursor,chunks,pos);
-          cursor=Math.max(cursor,matched.cursor);
-          aligned+=matched.words.length;
+        pos=nextPos;
+        for(let lane=0;lane<batch.length;lane++){
+          const {at,until,task}=batch[lane];
+          const done=await task;asrMs+=done.elapsed;
+          if(done.error)throw done.error;
+          check(signal);
+          const result=done.result;
+          const chunks=Array.isArray(result)?result:(result?.chunks||[]);
+          const started=clock();
+          if(!found){
+            const hit=identifyAnchor(anchorText,chunks);
+            if(hit){
+              found=true;foundTrack=track.id;foundAt=at+hit.audioStart;cursor=bodyStart;
+              progress('본문 시작 발견: '+track.name+' · '+foundAt.toFixed(1)+'초. 자동 정렬 시작.');
+              metrics('align',at,{parallelism:lanes});
+            }
+          }
+          let matched={words:[],cursor};
+          if(found){
+            matched=alignNextWindow(text,bodyStart,cursor,chunks,at);
+            cursor=Math.max(cursor,matched.cursor);
+            aligned+=matched.words.length;
+          }
+          matchMs+=clock()-started;segments++;
+          // Every checkpoint represents a *committed*, in-order window.
+          // Later prefetched clips do not move this position until saved.
+          const step=found?CLIP-3:SEARCH_STEP;
+          const nextAudio=Math.min(duration,at+step);
+          const scan={
+            found,trackId:track.id,foundTrackId:foundTrack,audioStart:foundAt,
+            nextAudio,audioDuration:duration,cursor,bodyStart,
+            updatedAt:new Date().toISOString(),complete:false
+          };
+          await save({trackId:track.id,words:matched.words,scan});
+          metrics(found?'align':'search',until,{parallelism:lanes});
+          if(found&&cursor>=text.length-2){
+            await save({trackId:track.id,words:[],scan:{...scan,nextAudio:until,complete:true}});
+            metrics('complete',until,{parallelism:lanes});
+            // Drain any other already-started ASR calls before returning.
+            await Promise.all(batch.slice(lane+1).map(x=>x.task));
+            return {found,foundTrack,foundAt,cursor,aligned,complete:true,decodeMs,asrMs,matchMs,segments};
+          }
+          // A search batch may find the anchor midway. Align next from a
+          // non-overlapping, committed position while retaining 3s overlap.
+          pos=Math.max(pos,nextAudio);
         }
-        matchMs+=clock()-started;segments++;
-        // Checkpoint the NEXT safe start after this successfully processed clip.
-        const nextAudio=Math.min(duration,pos+(found?CLIP-3:SEARCH_STEP));
-        const scan={
-          found,trackId:track.id,foundTrackId:foundTrack,audioStart:foundAt,
-          nextAudio,audioDuration:duration,cursor,bodyStart,updatedAt:new Date().toISOString(),complete:false
-        };
-        await save({trackId:track.id,words:matched.words,scan});
-        metrics(found?'align':'search',end);
-        if(found&&cursor>=text.length-2){
-          await save({trackId:track.id,words:[],scan:{...scan,nextAudio:end,complete:true}});
-          metrics('complete',end);
-          return {found,foundTrack,foundAt,cursor,aligned,complete:true,decodeMs,asrMs,matchMs,segments};
-        }
-        pos=nextAudio;
       }
       // Store completion of this track, even if the anchor was not found yet.
       await save({trackId:track.id,words:[],scan:{
