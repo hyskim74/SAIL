@@ -44,7 +44,7 @@
         <div class="panel-tabs"><button id="tab-notes" class="tab active" data-tab="notes">Notes</button><button id="tab-audio" class="tab" data-tab="audio">Audiobook</button><button id="tab-search" class="tab" data-tab="search">Search</button></div>
         <section id="notes-panel" class="panel-body active"><div class="help-note">원문에서 단어 또는 문장 범위를 드래그하면 주석을 작성할 수 있습니다.</div><input id="note-filter" class="text-input" placeholder="Search notes..." aria-label="주석 검색"><div id="notes-list" class="notes-list"></div></section>
         <section id="audio-panel" class="panel-body">
-          <div class="small-label">AUDIO FILES</div><label class="upload-tile">＋ Add MP3 / M4A / WAV / MP4 (Private Data)<input id="audio-upload" type="file" accept="audio/*,video/mp4,.mp3,.m4a,.wav,.ogg,.mp4,.m4v" multiple hidden></label><div class="help-note">Audiobook은 Private Data에 저장합니다. GitHub Data 전용 토큰을 연결하세요. 512MiB를 초과하는 파일은 나눠서 등록해야 합니다.</div><div id="audio-list" class="audio-list"></div><video id="audio-el" class="media-preview" aria-label="MP4 영상 및 음성 재생" preload="metadata" playsinline controls hidden></video><p id="video-help" class="fine-text" hidden>MP4는 브라우저에서 영상과 음성을 함께 재생합니다. 파일에 오디오 트랙이 있어야 소리가 나며, 지원 코덱은 브라우저에 따라 다릅니다.</p>
+          <div class="small-label">AUDIO FILES</div><label class="upload-tile">＋ Add MP3 / M4A / WAV / MP4 (Private Data)<input id="audio-upload" type="file" accept="audio/*,video/mp4,.mp3,.m4a,.wav,.ogg,.mp4,.m4v" multiple hidden></label><div class="help-note">Audiobook은 Private Data에 저장합니다. GitHub Data 전용 토큰을 연결하세요. 1GiB (1,024MiB)를 초과하는 파일은 나눠서 등록해야 합니다.</div><div id="audio-list" class="audio-list"></div><video id="audio-el" class="media-preview" aria-label="MP4 영상 및 음성 재생" preload="metadata" playsinline controls hidden></video><p id="video-help" class="fine-text" hidden>MP4는 브라우저에서 영상과 음성을 함께 재생합니다. 파일에 오디오 트랙이 있어야 소리가 나며, 지원 코덱은 브라우저에 따라 다릅니다.</p>
           <div class="small-label">IN-BROWSER AUTO ALIGNMENT</div>
           <div class="help-note">원문 구간을 선택하고, 대응하는 오디오의 시작·종료 시각을 지정하세요. 음성 인식과 매칭은 <strong>브라우저 안에서</strong> 처리합니다. 첫 실행에만 음성 모델 다운로드가 필요하며, 한 번에 최대 180초를 정렬할 수 있습니다.</div>
           <div class="input-pair"><label class="field-label">Audio from (seconds)<input class="text-input" type="number" id="align-start" min="0" step="0.1" value="0"></label><label class="field-label">Audio to (seconds)<input class="text-input" type="number" id="align-end" min="0" step="0.1" placeholder="예: 90"></label></div>
@@ -297,7 +297,8 @@ async function getRevision(bookId,section,sha){
 
 
 // === GitHub Private Data audiobook backup ===
-const AUDIO_CHUNK_SIZE=4*1024*1024, MAX_AUDIO_BYTES=512*1024*1024;
+const AUDIO_CHUNK_SIZE=4*1024*1024, MAX_AUDIO_BYTES=1024*1024*1024;
+const MAX_AUDIO_PARTS=Math.ceil(MAX_AUDIO_BYTES/AUDIO_CHUNK_SIZE);
 const audioDataPath=(bookId,trackId)=>'audiobooks/'+encodeURIComponent(bookId)+'/'+encodeURIComponent(trackId);
 function encodeAudioPart(bytes){let str='';for(let i=0;i<bytes.length;i+=32768)str+=String.fromCharCode(...bytes.subarray(i,i+32768));return btoa(str);}
 function decodeAudioPart(s){return Uint8Array.from(atob(String(s||'').replace(/\s/g,'')),c=>c.charCodeAt(0));}
@@ -312,7 +313,7 @@ async function uploadTrackToPrivateData(book,track,progress=()=>{}){
   await ensurePrivateData();
   const file=await getAudio(track.id);
   if(!file)throw new Error('이 기기에 오디오가 없어 Data에 업로드할 수 없습니다.');
-  if(file.size>MAX_AUDIO_BYTES)throw new Error('512MiB보다 큰 파일은 분할하여 등록해 주세요.');
+  if(file.size>MAX_AUDIO_BYTES)throw new Error('1GiB (1,024MiB)보다 큰 파일은 분할하여 등록해 주세요.');
   const root=audioDataPath(book.id,track.id),manifestPath=root+'/manifest.json';
   const previous=await getJSON(manifestPath);
   if(previous.data?.version===1&&previous.data?.size===file.size&&previous.data?.name===track.name){
@@ -344,7 +345,7 @@ async function downloadTrackFromPrivateData(book,track,progress=()=>{}){
   if(track.remote?.manifestPath!==root+'manifest.json')throw new Error('Data에 등록된 파일이 아닙니다.');
   const manifest=(await getJSON(track.remote.manifestPath)).data;
   if(!manifest||manifest.version!==1||manifest.bookId!==book.id||manifest.trackId!==track.id||
-     !Array.isArray(manifest.parts)||manifest.parts.length>128||manifest.size>MAX_AUDIO_BYTES)
+     !Array.isArray(manifest.parts)||manifest.parts.length>MAX_AUDIO_PARTS||manifest.size>MAX_AUDIO_BYTES)
     throw new Error('Data에 저장된 오디오 목록이 올바르지 않습니다.');
   const chunks=[];let size=0;
   for(let i=0;i<manifest.parts.length;i++){
@@ -1083,7 +1084,7 @@ function renderSearch(){const list=$('#search-results');list.replaceChildren();c
 }
 function openGitSettings(){
   const cfg=getGitConfig();
-  showDialog('GitHub sync settings',`<p>메모·진도·Audiobook은 <strong>hyskim74/Data (Private)</strong>에 저장합니다. PDF/EPUB 원본은 Git에 자동 업로드하지 않습니다. 음원은 4MiB씩 분할 저장하며 파일당 최대 512MiB입니다. 접근 토큰은 브라우저 메모리에만 유지되며 새로고침 시 다시 입력해야 합니다.</p><label class="field-label">GitHub owner<input id="git-owner" class="text-input" value="hyskim74" readonly></label><label class="field-label">Data repository<input id="git-repo" class="text-input" value="Data" readonly></label><label class="field-label">Branch<input id="git-branch" class="text-input" value="main" readonly></label><label class="field-label">Fine-grained access token (contents: read & write)<input id="git-token" class="text-input" type="password" autocomplete="off" placeholder="Paste short-lived token (not stored)"></label><p>브라우저에서 GitHub API를 직접 호출합니다. 기기의 보안을 신뢰할 수 있을 때만 토큰을 입력하세요. 토큰을 소스 코드, URL, Git 커밋에 넣지 마세요.</p><div class="button-row" style="flex-wrap:wrap"><button class="secondary-btn" id="git-disconnect">Forget token</button><button class="secondary-btn" id="git-restore">Restore library</button><button class="secondary-btn" id="git-history">Revision history</button><button class="primary-btn" id="git-save">Connect & sync</button></div><p id="git-status" role="status"></p>`);
+  showDialog('GitHub sync settings',`<p>메모·진도·Audiobook은 <strong>hyskim74/Data (Private)</strong>에 저장합니다. PDF/EPUB 원본은 Git에 자동 업로드하지 않습니다. 음원은 4MiB씩 분할 저장하며 파일당 최대 1GiB (1,024MiB)입니다. 접근 토큰은 브라우저 메모리에만 유지되며 새로고침 시 다시 입력해야 합니다.</p><label class="field-label">GitHub owner<input id="git-owner" class="text-input" value="hyskim74" readonly></label><label class="field-label">Data repository<input id="git-repo" class="text-input" value="Data" readonly></label><label class="field-label">Branch<input id="git-branch" class="text-input" value="main" readonly></label><label class="field-label">Fine-grained access token (contents: read & write)<input id="git-token" class="text-input" type="password" autocomplete="off" placeholder="Paste short-lived token (not stored)"></label><p>브라우저에서 GitHub API를 직접 호출합니다. 기기의 보안을 신뢰할 수 있을 때만 토큰을 입력하세요. 토큰을 소스 코드, URL, Git 커밋에 넣지 마세요.</p><div class="button-row" style="flex-wrap:wrap"><button class="secondary-btn" id="git-disconnect">Forget token</button><button class="secondary-btn" id="git-restore">Restore library</button><button class="secondary-btn" id="git-history">Revision history</button><button class="primary-btn" id="git-save">Connect & sync</button></div><p id="git-status" role="status"></p>`);
   $('#git-save').onclick=async()=>{
     try{
       const secret=$('#git-token').value;
