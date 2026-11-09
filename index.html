@@ -61,6 +61,17 @@
 @media(max-width:1180px){.sidebar{width:310px;flex-basis:310px}.sidebar.collapsed{width:var(--sidebar-rail);flex-basis:var(--sidebar-rail)}.reading-article{padding:0 38px 75px}}
 @media(max-width:900px){.sidebar,.sidebar.collapsed{display:none;position:fixed;z-index:28;top:0;left:0;height:calc(100dvh - var(--player-height));width:min(350px,92vw);flex-basis:auto;box-shadow:var(--shadow);padding:14px 12px 10px}.sidebar.open,.sidebar.collapsed.open{display:flex}.sidebar.open .brand-name,.sidebar.open .nav-label{display:block!important}.sidebar.open .library-section{display:flex}.sidebar.open:not([data-section="library"]) .library-section{display:none}.sidebar.open:not([data-section="library"]) .right-panel{display:flex!important}.sidebar.open .sidebar-bottom .side-action{font-size:12px;justify-content:flex-start}.sidebar.open .sidebar-bottom .side-action span{font-size:18px}.sidebar.open .sidebar-nav-btn{justify-content:flex-start;padding:7px 12px}.sidebar.open .sidebar-nav{margin-bottom:14px}.sidebar.open .brand-mark{font-size:36px}.sidebar-collapse{display:none}.sync-mini{max-width:145px}}
 @media(max-width:650px){:root{--player-height:105px}.app-shell{height:calc(100dvh - var(--player-height))}.player{height:var(--player-height)}.topbar{padding:0 11px}.sync-mini{max-width:105px;min-width:65px;font-size:10px}.sync-mini-track{width:22px}.topbar-actions #notes-toggle{display:none}.topbar-actions{gap:5px}.reading-article{padding-bottom:50px}}
+
+/* Library item metadata + direct delete, without nesting buttons */
+.library-row{display:flex;align-items:center;gap:4px;min-width:0;padding-right:2px}
+.library-row .book-item{min-width:0;flex:1;margin-bottom:5px;padding-right:5px}
+.library-row .book-item .book-spine{width:32px;height:42px}
+.library-row .book-item .book-label{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.library-row .book-imported{font-size:10px;line-height:1.45;color:#818c80;margin-top:4px;display:block;white-space:normal}
+.library-row .book-delete{flex:0 0 28px;width:28px;height:30px;border:1px solid transparent;background:transparent;color:#84938a;border-radius:7px;display:grid;place-items:center;padding:0;margin-bottom:5px}
+.library-row:hover .book-delete,.library-row .book-delete:focus-visible{color:#a35e58}
+.library-row .book-delete:hover,.library-row .book-delete:focus-visible{background:#fae8e5;border-color:#eac1bb;color:#9c3f3b;outline-offset:2px}
+@media (max-width:1180px){.library-row .book-item{gap:8px}}
 </style>
 </head>
 <body>
@@ -327,7 +338,7 @@ async function syncBook(book,onStep=()=>{}){
     }
     onStep(section);
   }
-  await updateIndex([{id:book.id,title:book.title,sourceType:book.sourceType,updatedAt:isoNow()}]);
+  await updateIndex([{id:book.id,title:book.title,sourceType:book.sourceType,createdAt:book.createdAt||null,updatedAt:isoNow()}]);
   return book;
 }
 async function updateIndex(entries){
@@ -797,17 +808,82 @@ function setTab(name){
  if(name==='audio')restoreStoredSyncProgress();
 }
 function updateCounts(){const n=(state.book?.annotations||[]).filter(a=>!a.deletedAt).length;$('#notes-count').textContent=n;$('#annotation-count-small').textContent=n;}
+function formatImportedAt(value){
+  if(!value)return '가져온 일시 기록 없음';
+  const d=new Date(value);
+  if(!Number.isFinite(d.getTime()))return '가져온 일시 기록 없음';
+  const f=n=>String(n).padStart(2,'0');
+  // The original import timestamp is stored as ISO UTC; display local browser time.
+  return String(d.getFullYear())+'-'+f(d.getMonth()+1)+'-'+f(d.getDate())+
+    ' '+f(d.getHours())+':'+f(d.getMinutes());
+}
 function updateLibrary(){
   elements.books.replaceChildren();
   const list=[...state.books].sort((a,b)=>(b.updatedAt||'').localeCompare(a.updatedAt||''));
   for(const b of list){
-    const btn=document.createElement('button');btn.className='book-item'+(b.id===state.book?.id?' active':'');btn.dataset.id=b.id;
-    const icon=document.createElement('div');icon.className='book-spine';icon.textContent=(b.title||'B').slice(0,1).toUpperCase();
-    const lab=document.createElement('div');lab.style.minWidth='0';const title=document.createElement('span');title.className='book-label';title.textContent=b.title;
-    const sub=document.createElement('small');sub.textContent=`${(b.blocks||[]).length?'Ready':'Source needed'} · ${b.sourceType||'TXT'}`;
-    lab.append(title,sub);btn.append(icon,lab);btn.addEventListener('click',()=>chooseBook(b.id));elements.books.append(btn);
+    const row=document.createElement('div');row.className='library-row';
+    const btn=document.createElement('button');btn.type='button';
+    btn.className='book-item'+(b.id===state.book?.id?' active':'');
+    btn.dataset.id=b.id;
+    const icon=document.createElement('div');icon.className='book-spine';
+    icon.textContent=(b.title||'B').slice(0,1).toUpperCase();
+    const lab=document.createElement('div');lab.style.minWidth='0';lab.style.flex='1';
+    const title=document.createElement('span');title.className='book-label';title.textContent=b.title;
+    const sub=document.createElement('small');
+    sub.textContent=(b.blocks||[]).length?'Ready · '+(b.sourceType||'TXT'):'Source needed · '+(b.sourceType||'TXT');
+    const created=document.createElement('span');created.className='book-imported';
+    created.textContent='Imported: '+formatImportedAt(b.createdAt);
+    lab.append(title,sub,created);btn.append(icon,lab);
+    btn.title=b.title+'\nImported: '+formatImportedAt(b.createdAt);
+    btn.addEventListener('click',()=>chooseBook(b.id));
+    const del=document.createElement('button');del.type='button';del.className='book-delete';
+    del.textContent='✕';del.title='라이브러리에서 '+b.title+' 삭제';
+    del.setAttribute('aria-label',b.title+' 삭제');
+    del.addEventListener('click',event=>{event.stopPropagation();deleteLibraryBook(b.id);});
+    row.append(btn,del);elements.books.append(row);
   }
 }
+async function deleteLibraryBook(bookId){
+  const book=state.books.find(b=>b.id===bookId);
+  if(!book)return;
+  if(marginAutoAbort&&state.book?.id===bookId){
+    toast('자동 싱크 진행 중에는 삭제할 수 없습니다. 먼저 중단해 주세요.',true);return;
+  }
+  if(state.syncing&&state.book?.id===bookId){
+    toast('GitHub 동기화 중입니다. 완료 후 삭제해 주세요.',true);return;
+  }
+  if(!confirm('“'+book.title+'”을(를) 이 기기의 My Library에서 삭제할까요?\n\n로컬 원문·주석·음원도 삭제됩니다. Private GitHub Data에 저장된 메모와 Audiobook은 삭제되지 않습니다.'))return;
+  clearTimeout(state.saveTimers.get(bookId));state.saveTimers.delete(bookId);
+  clearTimeout(state.syncTimers.get(bookId));state.syncTimers.delete(bookId);
+  const selected=state.book?.id===bookId;
+  try{
+    if(selected){player.setBook(null);state.activeTrack=null;}
+    await removeBook(bookId);
+    const others=state.books.filter(b=>b.id!==bookId);
+    const used=new Set(others.flatMap(b=>(b.audioTracks||[]).map(t=>t.id)));
+    for(const audio of book.audioTracks||[])if(!used.has(audio.id))await removeAudio(audio.id);
+    state.books=others;
+    if(selected){
+      state.book=null;
+      try{localStorage.removeItem('margin-last-book');}catch{}
+      closeDialog();
+      if(state.books.length)await chooseBook(state.books[0].id);
+      else{
+        state.selection=null;state.playingWord=null;
+        updateLibrary();setTitle();elements.reader.replaceChildren();
+        renderNotes();renderAudio();renderSearch();restoreStoredSyncProgress();
+      }
+    }else updateLibrary();
+    toast('“'+book.title+'”이(가) My Library에서 삭제되었습니다. Private Data에는 그대로 보관됩니다.');
+  }catch(e){
+    toast('책 삭제 중 오류: '+e.message,true);
+    // Reload the library if storage was changed before the error.
+    try{state.books=await listBooks();}catch{}
+    if(selected&&state.book?.id===bookId)state.book=null;
+    updateLibrary();
+  }
+}
+
 function setTitle(){
   const b=state.book;$('#active-book-title').textContent=b?.title||'Welcome';
   $('#active-book-title').title=b?.title||'';
@@ -987,6 +1063,7 @@ function openImportDialog(){
       if(file)book=($('#import-ocr').checked&&file.name.toLowerCase().endsWith('.pdf')) ? await ocrPdf(file,s=>$('#import-status').textContent=s) : await importBook(file,s=>$('#import-status').textContent=s);
       else book=makeBook(title||'Pasted text',pasted,'pasted');
       if(title)book.title=title;
+      book.createdAt=isoNow(); // successful import time, not OCR/parser start time
       state.books.push(book);await saveBook(book);
       closeDialog();await chooseBook(book.id);toast('책을 가져왔습니다.');
     }catch(e){$('#import-status').textContent=e.message;$('#import-status').className='error-text';toast('가져오기 실패: '+e.message,true);}
@@ -1031,14 +1108,7 @@ function openEditSource(){
     if(bookText(b)!==newText && (activeNotes().length||Object.keys(b.wordAlignments||{}).length)&& !confirm('원문 수정은 기존 오디오 정렬을 삭제하고 주석 위치를 다시 계산합니다. 계속할까요?'))return;
     replaceSource(newText,newTitle);closeDialog();toast('원문이 저장되었습니다.');
   };
-  $('#delete-book').onclick=async()=>{
-    if(!confirm(`“${b.title}” 책의 로컬 데이터와 주석을 삭제할까요? GitHub에 이미 업로드된 데이터는 별도로 남습니다.`))return;
-    await removeBook(b.id);for(const a of b.audioTracks||[])await removeAudio(a.id);
-    state.books=state.books.filter(x=>x.id!==b.id);state.book=null;closeDialog();
-    if(state.books.length)await chooseBook(state.books[0].id);
-    else{player.setBook(null);updateLibrary();setTitle();elements.reader.replaceChildren();renderNotes();renderAudio();}
-    toast('이 기기에서 책을 삭제했습니다.');
-  };
+  $('#delete-book').onclick=()=>deleteLibraryBook(b.id);
 }
 function renderAudio(){
   const list=$('#audio-list'),times=$('#timings-list');list.replaceChildren();times.replaceChildren();const b=state.book;
@@ -1279,7 +1349,7 @@ function openGitSettings(){
       for(const remote of list){
         const metadata=await pullRemoteBook(remote.id);
         let local=state.books.find(b=>b.id===remote.id);
-        if(!local){local=makeBook(remote.title||'Remote book','',remote.sourceType||'unknown');local.id=remote.id;local.title=remote.title;local.blocks=[];state.books.push(local);}
+        if(!local){local=makeBook(remote.title||'Remote book','',remote.sourceType||'unknown');local.id=remote.id;local.title=remote.title;local.createdAt=remote.createdAt||null;local.blocks=[];state.books.push(local);}
         for(const section of ['annotations','progress','alignment']){
           const data=metadata[section];if(!data)continue;
           if(data.sourceFingerprint&&!local.blocks?.length)local.sourceFingerprint=data.sourceFingerprint;
@@ -1337,7 +1407,7 @@ async function importBackupFile(file){
   let data;
   try{data=JSON.parse(await file.text());if(data.format!=='margin-backup-v1'||!Array.isArray(data.books))throw new Error('지원하지 않는 백업 형식입니다.');
     for(const b of data.books){if(!b.id||!Array.isArray(b.blocks)||!Array.isArray(b.annotations))throw new Error('손상된 책 데이터가 있습니다.');
-      const prev=state.books.find(x=>x.id===b.id);if(prev){prev.annotations=mergeById(prev.annotations,b.annotations);prev.audioMappings=mergeById(prev.audioMappings,b.audioMappings||[]);prev.wordAlignments=mergeAlignment(prev.wordAlignments,b.wordAlignments||{});prev.progress=mergeProgress(prev.progress,b.progress||{});if(!prev.blocks.length&&b.blocks.length)prev.blocks=b.blocks;await saveBook(prev);}
+      const prev=state.books.find(x=>x.id===b.id);if(prev){prev.annotations=mergeById(prev.annotations,b.annotations);prev.audioMappings=mergeById(prev.audioMappings,b.audioMappings||[]);prev.wordAlignments=mergeAlignment(prev.wordAlignments,b.wordAlignments||{});prev.progress=mergeProgress(prev.progress,b.progress||{});if(!prev.blocks.length&&b.blocks.length)prev.blocks=b.blocks;if(!prev.createdAt&&b.createdAt)prev.createdAt=b.createdAt;await saveBook(prev);}
       else{state.books.push(b);await saveBook(b);}
     }
     updateLibrary();if(!state.book&&state.books.length)await chooseBook(state.books[0].id);else if(state.book){renderReader();renderNotes();renderAudio();}
