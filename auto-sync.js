@@ -149,7 +149,7 @@ export async function discoverAndSync({text,bodyStart,tracks,loadBlob,transcribe
         }
         pos+=found?CLIP-3:SEARCH_STEP;
       }
-      if(found)await save({trackId:track.id,words:[],scan:{found:true,trackId:track.id,audioStart:foundAt,nextAudio:duration,cursor,updatedAt:new Date().toISOString(),complete:index===tracks.length-1}});
+      if(found)await save({trackId:track.id,words:[],scan:{found:true,trackId:track.id,audioStart:foundAt,nextAudio:duration,cursor,updatedAt:new Date().toISOString(),complete:cursor>=text.length-2}});
     }finally{await sampler.close();}
   }
   if(!found)throw new Error('표시한 본문 시작 문장을 자동으로 찾지 못했습니다. 원서와 Audiobook이 같은 판본인지 확인하세요.');
