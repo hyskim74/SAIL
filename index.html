@@ -1368,18 +1368,23 @@ function renderSyncProgress(info={}){
   const pct=phase==='complete'?100:phase==='search'?audioPct:textPct;
   const labels={
     idle:'싱크 대기',loading:'음성 모델 준비 중',search:'본문 시작 자동 탐색',
+    'search-paused':'본문 시작 검색 일시 중단',
     align:'본문 단어 정렬',complete:'싱크 완료',paused:'싱크 일시 중단',
     error:'싱크 오류',missing:'오디오 파일 필요'
   };
   const number=phase==='loading'||phase==='idle'||phase==='missing'?'—':pct.toFixed(1)+'%';
   const track=info.trackName?(' · '+info.trackName):'';
   let description='';
-  if(phase==='search')description='현재 음원 탐색 '+Math.floor(info.audioPosition||0)+' / '+Math.floor(info.audioDuration||0)+'초'+track+' · 파일 '+(info.trackIndex||1)+'/'+(info.trackCount||1);
+  if(phase==='search'||phase==='search-paused')description='현재 음원 탐색 '+Math.floor(info.audioPosition||0)+(info.audioDuration?' / '+Math.floor(info.audioDuration)+'초':'초까지')+track+(phase==='search-paused'?' · 여기서 재개할 수 있습니다.':' · 파일 '+(info.trackIndex||1)+'/'+(info.trackCount||1));
   else if(phase==='align'||phase==='paused'||phase==='complete')description='본문 정렬 위치 '+bodyDone.toLocaleString()+' / '+bodyTotal.toLocaleString()+'자'+track+(Number.isFinite(info.aligned)?' · 이번 작업 '+info.aligned+'개 단어 매칭':'');
   else if(phase==='error')description='진행 내용은 로컬에 보관됩니다. 문제를 해결한 후 다시 실행하세요.';
   else if(phase==='loading')description='Whisper 모델을 준비하고 있습니다. 오디오 위치를 수동 입력할 필요는 없습니다.';
   else if(phase==='missing')description='Private Data에서 해당 음원을 복원한 뒤 다시 실행하세요.';
   else description='본문 시작을 지정한 후 Audiobook에서 자동 싱크를 시작하세요.';
+  if(info.segments){
+    const mode=info.decoderMode==='fast'?'고속 디코딩':info.decoderMode==='buffer'?'메모리 디코딩':'실시간 추출';
+    description+=' · '+mode+' · 추출 '+Math.round((info.decodeMs||0)/1000)+'초 / 인식 '+Math.round((info.asrMs||0)/1000)+'초';
+  }
   const progress=$('#sync-progress-bar');progress.value=pct;
   $('#sync-progress-stage').textContent=labels[phase]||labels.idle;
   $('#sync-progress-pct').textContent=number;
@@ -1395,12 +1400,16 @@ function restoreStoredSyncProgress(){
   if(marginAutoAbort)return;
   const b=state.book;
   if(!b){renderSyncProgress({phase:'idle'});return;}
-  const from=bodyStartPosition(),scans=(b.audioTracks||[]).map(t=>({track:t,scan:b.wordAlignments?.[t.id]?.scan})).filter(x=>x.scan?.found);
+  const from=bodyStartPosition();
+  const scans=(b.audioTracks||[]).map(t=>({track:t,scan:b.wordAlignments?.[t.id]?.scan}))
+    .filter(x=>x.scan&&(!Number.isFinite(x.scan.bodyStart)||x.scan.bodyStart===from))
+    .sort((a,b)=>String(b.scan.updatedAt||'').localeCompare(String(a.scan.updatedAt||'')));
   if(from===null||!scans.length){renderSyncProgress({phase:'idle'});return;}
-  const record=scans.find(x=>!x.scan.complete)||scans.at(-1);
-  const scan=record.scan;
-  renderSyncProgress({phase:scan.complete?'complete':'paused',trackId:record.track.id,trackName:record.track.name,
-    bodyStart:from,cursor:scan.cursor??from,totalChars:bookText(b).length});
+  const record=scans[0],scan=record.scan;
+  renderSyncProgress({phase:scan.complete?'complete':scan.found?'paused':'search-paused',
+    trackId:record.track.id,trackName:record.track.name,audioPosition:scan.nextAudio,
+    audioDuration:scan.audioDuration,bodyStart:from,cursor:scan.cursor??from,
+    totalChars:bookText(b).length});
 }
 function bodyStartPosition(){const n=state.book?.progress?.bodyStart;return Number.isInteger(n)&&n>=0?n:null;}
 function showBodyStart(){
@@ -1409,7 +1418,12 @@ function showBodyStart(){
   label.textContent=pos===null?'본문 첫 문장을 원문에서 드래그한 다음 ① 본문 시작 표시를 누르세요.':
     '본문 시작 등록됨: “'+bookText(state.book).slice(pos,pos+115).replace(/\s+/g,' ').trim()+'…”';
   const btn=$('#auto-align');
-  if(btn)btn.textContent=(state.book?.audioTracks||[]).some(t=>state.book?.wordAlignments?.[t.id]?.scan?.found)?'② 자동 단어 싱크 이어하기':'② 본문 시작 자동 검색 + 전체 단어 싱크';
+  if(btn){
+    const scans=(state.book?.audioTracks||[]).map(t=>state.book?.wordAlignments?.[t.id]?.scan).filter(Boolean);
+    btn.textContent=scans.some(s=>s.complete)?'② 자동 단어 싱크 완료':
+      scans.some(s=>s.found)?'② 자동 단어 싱크 이어하기':
+      scans.some(s=>Number.isFinite(s.nextAudio))?'② 본문 시작 검색 이어하기':'② 본문 시작 자동 검색 + 전체 단어 싱크';
+  }
 }
 function markBodyStart(){
   if(marginAutoAbort)return toast('진행 중인 자동 싱크를 중단한 뒤 시작점을 변경하세요.',true);
@@ -1436,9 +1450,40 @@ async function runAutomaticBookSync(){
   let lastMetric={phase:'loading',bodyStart,totalChars:notes.length,cursor:bodyStart};
   renderSyncProgress(lastMetric);
   const onMetrics=m=>{lastMetric=m;renderSyncProgress(m);};
-  const existing=b.audioTracks.map(t=>({track:t,scan:b.wordAlignments?.[t.id]?.scan}))
-    .find(x=>x.scan?.found&&!x.scan?.complete);
-  const startingState=existing?.scan||null;
+  const scans=b.audioTracks.map(t=>({track:t,scan:b.wordAlignments?.[t.id]?.scan}))
+    .filter(x=>x.scan&&(!Number.isFinite(x.scan.bodyStart)||x.scan.bodyStart===bodyStart))
+    .sort((a,b)=>String(b.scan.updatedAt||'').localeCompare(String(a.scan.updatedAt||'')));
+  if(scans.some(x=>x.scan.complete)){
+    marginAutoAbort=null;button.disabled=false;cancel.hidden=true;
+    return toast('이 원서의 자동 싱크가 이미 완료되었습니다.',false);
+  }
+  const startingState=scans[0]?.scan||null;
+  let checkpointsChanged=false;
+  const wordCache=new Map();
+  function addAlignedWords(trackId,record,newWords){
+    if(!newWords.length)return;
+    let cache=wordCache.get(trackId);
+    if(!cache){
+      cache=new Map((record.words||[]).map(w=>[w.startChar+'-'+w.endChar,w]));
+      wordCache.set(trackId,cache);
+    }
+    const list=record.words||[];
+    for(const w of newWords){
+      const key=w.startChar+'-'+w.endChar,old=cache.get(key);
+      if(old){
+        if(old.quality==='automatic-asr'&&w.start<old.start)Object.assign(old,w);
+        continue;
+      }
+      if(!list.length||list[list.length-1].startChar<=w.startChar)list.push(w);
+      else{
+        let lo=0,hi=list.length;
+        while(lo<hi){const mid=(lo+hi)>>1;if(list[mid].startChar<w.startChar)lo=mid+1;else hi=mid;}
+        list.splice(lo,0,w);
+      }
+      cache.set(key,w);
+    }
+    record.words=list;
+  }
   try{
     progress('Whisper 음성 인식 모델 준비 중… 첫 실행에는 다운로드가 필요합니다.');
     const pipe=await recognizer(progress);
@@ -1460,11 +1505,17 @@ async function runAutomaticBookSync(){
       },
       progress,onMetrics,
       save:async ({trackId,words,scan})=>{
-        const existing=b.wordAlignments[trackId]||{words:[]};
-        b.wordAlignments[trackId]={...existing,words:mergeAutomaticWords(existing.words||[],words),
-          scan:{...scan,bodyStart},source:'browser-whisper-auto',updatedAt:isoNow()};
-        scheduleSave();showBodyStart();
-        if(words.length)progress('본문 자동 싱크 진행: '+b.wordAlignments[trackId].words.length+'개 단어 연결 · 오디오 '+Math.floor(scan.nextAudio)+'초');
+        const record=b.wordAlignments[trackId]||{words:[]};
+        addAlignedWords(trackId,record,words);
+        record.scan={...scan,bodyStart};
+        record.source='browser-whisper-auto';
+        record.updatedAt=isoNow();
+        b.wordAlignments[trackId]=record;
+        checkpointsChanged=true;
+        // Persist locally throughout the job; do NOT queue repeated GitHub syncs.
+        if(state.book?.id===b.id)scheduleSave(false);
+        else await saveBook(b);
+        if(words.length)progress('본문 자동 싱크 진행: '+record.words.length+'개 단어 연결 · 오디오 '+Math.floor(scan.nextAudio)+'초');
       }
     });
     if(data.foundTrack){state.activeTrack=data.foundTrack;await setActiveTrack(data.foundTrack,false);}
@@ -1483,6 +1534,12 @@ async function runAutomaticBookSync(){
       progress('자동 싱크 오류: '+e.message);toast(e.message,true);
     }
   }finally{
+    // Flush the latest checkpoint before allowing a new session.
+    if(checkpointsChanged){
+      clearTimeout(state.saveTimers.get(b.id));state.saveTimers.delete(b.id);
+      try{await saveBook(b);}catch(e){toast('싱크 결과 로컬 저장 실패: '+e.message,true);}
+      if(gitReady())scheduleSync(b); // One deferred private backup, not per audio window.
+    }
     marginAutoAbort=null;button.disabled=false;cancel.hidden=true;renderAudio();showBodyStart();
   }
 }
