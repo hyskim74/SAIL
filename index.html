@@ -892,7 +892,7 @@ function handlePosition(){clearTimeout(positionTimer);positionTimer=setTimeout((
     const b=state.book;if(!b?.blocks?.length)return;
     const box=$('#reader-pane').getBoundingClientRect();
     const first=b.blocks.find(t=>{const rect=$('#block-'+t.id)?.getBoundingClientRect();return rect && rect.bottom>box.top+45;});
-    if(first&&first.start!==b.progress?.position){b.progress={position:first.start,updatedAt:isoNow()};scheduleSave();}
+    if(first&&first.start!==b.progress?.position){b.progress={...(b.progress||{}),position:first.start,updatedAt:isoNow()};scheduleSave();}
   },1000);
 }
 function openImportDialog(){
