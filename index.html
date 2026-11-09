@@ -1474,7 +1474,6 @@ async function runAutomaticBookSync(){
   const notes=bookText(b),progress=message=>{status.textContent=message;};
   const requestedWorkers=Number($('#sync-parallelism').value)===2?2:1;
   $('#sync-parallelism').disabled=true;
-  $('#reset-auto-align').disabled=true;
   let lastMetric={phase:'loading',bodyStart,totalChars:notes.length,cursor:bodyStart};
   renderSyncProgress(lastMetric);
   const onMetrics=m=>{lastMetric=m;renderSyncProgress(m);};
@@ -1604,15 +1603,17 @@ async function clearAndRestartAutomaticSync(){
   if(bodyStartPosition()===null||!b.audioTracks?.length)
     return toast('본문 시작 표시와 Audiobook 등록이 필요합니다.',true);
   if(state.syncing)return toast('GitHub 동기화가 끝난 뒤 자동 싱크 기록을 초기화해 주세요.',true);
-  const autoTracks=(b.audioTracks||[]).filter(t=>{
-    const entry=b.wordAlignments?.[t.id];
-    return entry?.scan||entry?.source==='browser-whisper-auto';
-  });
-  if(!confirm('이 책의 기존 자동 단어 싱크와 검색 진행 기록을 삭제하고 처음부터 다시 시작할까요?\\n\\n수동으로 지정한 오디오 구간과 원본 음원은 유지됩니다.'))return;
+  if(!confirm('이 책의 기존 자동 단어 싱크와 검색 진행 기록을 삭제하고 처음부터 다시 시작할까요?\n\n수동으로 지정한 오디오 구간과 원본 음원은 유지됩니다.'))return;
   if(marginAutoAbort){
     marginAutoAbort.abort();
     await marginAutoRunPromise?.catch(()=>{});
   }
+  if(state.book?.id!==b.id)return toast('다른 책이 선택되어 초기화를 중단했습니다.',true);
+  // Collect AFTER the previous session stops, including its last checkpoint.
+  const autoTracks=(b.audioTracks||[]).filter(t=>{
+    const entry=b.wordAlignments?.[t.id];
+    return entry?.scan||entry?.source==='browser-whisper-auto';
+  });
   // Protect against a prior scheduled GitHub sync overwriting the reset.
   clearTimeout(state.syncTimers.get(b.id));state.syncTimers.delete(b.id);
   clearTimeout(state.saveTimers.get(b.id));state.saveTimers.delete(b.id);
