@@ -777,7 +777,25 @@ function activeNotes(){return (state.book?.annotations||[]).filter(a=>!a.deleted
 function noteText(a){return a.quote||getSnippet(state.book,a.start,a.end);}
 function showDialog(title,html){$('#dialog-title').textContent=title;$('#dialog-content').innerHTML=html;$('#dialog-overlay').hidden=false;}
 function closeDialog(){$('#dialog-overlay').hidden=true;$('#dialog-content').replaceChildren();}
-function setTab(name){$$('.tab').forEach(b=>b.classList.toggle('active',b.dataset.tab===name));$$('.panel-body').forEach(b=>b.classList.toggle('active',b.id===`${name}-panel`));$('#right-panel').classList.add('open');}
+const sidebarSections=new Set(['library','notes','audio','search']);
+function setSidebarCollapsed(collapsed,persist=true){
+ const side=$('#sidebar'),btn=$('#sidebar-collapse');
+ if(window.innerWidth<=900){side.classList.toggle('open',!collapsed);side.classList.remove('collapsed');return;}
+ side.classList.toggle('collapsed',!!collapsed);
+ btn.textContent=collapsed?'›':'‹';btn.title=collapsed?'왼쪽 메뉴 펼치기':'왼쪽 메뉴 접기';btn.setAttribute('aria-expanded',String(!collapsed));
+ if(persist)try{localStorage.setItem('margin-sidebar-collapsed',collapsed?'1':'0');}catch{}
+}
+function setTab(name){
+ if(!sidebarSections.has(name))return;
+ $('#sidebar').dataset.section=name;
+ $('.sidebar-nav-btn').forEach(b=>{const active=b.dataset.section===name;b.classList.toggle('active',active);b.setAttribute('aria-current',active?'page':'false');});
+ $('.tab').forEach(b=>b.classList.toggle('active',b.dataset.tab===name));
+ $('.panel-body').forEach(b=>b.classList.toggle('active',b.id===name+'-panel'));
+ $('#sidebar-panel-title').textContent=({library:'Library',notes:'Annotations',audio:'Audiobook',search:'Search'})[name];
+ $('#annotation-count-small').hidden=name!=='notes';
+ setSidebarCollapsed(false);
+ if(name==='audio')restoreStoredSyncProgress();
+}
 function updateCounts(){const n=(state.book?.annotations||[]).filter(a=>!a.deletedAt).length;$('#notes-count').textContent=n;$('#annotation-count-small').textContent=n;}
 function updateLibrary(){
   elements.books.replaceChildren();
@@ -922,7 +940,7 @@ function scrollToOffset(position,smooth=true){const b=findBlock(position);if(!b)
 function renderNotes(){
   updateCounts();const list=$('#notes-list');list.replaceChildren();const filter=$('#note-filter').value.toLowerCase();const notes=(state.book?.annotations||[]).filter(a=>!a.deletedAt).filter(a=>`${noteText(a)} ${a.body} ${a.category}`.toLowerCase().includes(filter)).sort((a,b)=>a.start-b.start);
   if(!notes.length){list.innerHTML='<div class="empty-mini">아직 작성된 주석이 없거나 검색 결과가 없습니다.</div>';return;}
-  for(const a of notes){const n=document.createElement('div');n.className='side-note';n.dataset.id=a.id;const type=document.createElement('div');type.className='note-category';type.textContent=(a.orphaned?'⚠ 위치 재연결 필요 · ':'')+(a.category||'Note');const q=document.createElement('p');q.className='note-quote';q.textContent='“'+noteText(a).slice(0,150)+'”';const body=document.createElement('div');body.className='note-body';body.textContent=a.body;n.append(type,q,body);n.addEventListener('click',()=>{if(a.orphaned){if(!state.selection){toast('주석을 다시 연결할 원문 구간을 선택한 뒤 주석 목록에서 다시 클릭하세요.',true);return;}a.start=state.selection.start;a.end=state.selection.end;a.quote=state.selection.quote;a.orphaned=false;a.updatedAt=isoNow();scheduleSave();renderReader();renderNotes();toast('주석을 선택한 텍스트에 다시 연결했습니다.');return;}scrollToOffset(a.start);if(!state.showNotes){state.showNotes=true;renderReader();}if(window.innerWidth<650)$('#right-panel').classList.remove('open');});list.append(n);}
+  for(const a of notes){const n=document.createElement('div');n.className='side-note';n.dataset.id=a.id;const type=document.createElement('div');type.className='note-category';type.textContent=(a.orphaned?'⚠ 위치 재연결 필요 · ':'')+(a.category||'Note');const q=document.createElement('p');q.className='note-quote';q.textContent='“'+noteText(a).slice(0,150)+'”';const body=document.createElement('div');body.className='note-body';body.textContent=a.body;n.append(type,q,body);n.addEventListener('click',()=>{if(a.orphaned){if(!state.selection){toast('주석을 다시 연결할 원문 구간을 선택한 뒤 주석 목록에서 다시 클릭하세요.',true);return;}a.start=state.selection.start;a.end=state.selection.end;a.quote=state.selection.quote;a.orphaned=false;a.updatedAt=isoNow();scheduleSave();renderReader();renderNotes();toast('주석을 선택한 텍스트에 다시 연결했습니다.');return;}scrollToOffset(a.start);if(!state.showNotes){state.showNotes=true;renderReader();}if(window.innerWidth<=900)$('#sidebar').classList.remove('open');});list.append(n);}
 }
 function openAnnotationEditor(existing=null){
   const s=existing?{start:existing.start,end:existing.end,quote:noteText(existing)}:state.selection;
@@ -1163,7 +1181,7 @@ function renderSearch(){const list=$('#search-results');list.replaceChildren();c
   const text=bookText(state.book);let pos=0,n=0;const lq=q.toLowerCase(),lt=text.toLowerCase();
   while((pos=lt.indexOf(lq,pos))!==-1&&n<70){const hit=document.createElement('div');hit.className='search-hit';
     hit.textContent='…'+text.slice(Math.max(0,pos-48),pos)+'【'+text.slice(pos,pos+q.length)+'】'+text.slice(pos+q.length,pos+q.length+55)+'…';
-    const target=pos;hit.onclick=()=>{scrollToOffset(target);if(window.innerWidth<650)$('#right-panel').classList.remove('open');};list.append(hit);pos+=q.length;n++;
+    const target=pos;hit.onclick=()=>{scrollToOffset(target);if(window.innerWidth<=900)$('#sidebar').classList.remove('open');};list.append(hit);pos+=q.length;n++;
   }
   if(!n)list.innerHTML='<div class="empty-mini">검색 결과가 없습니다.</div>';
 }
@@ -1274,10 +1292,12 @@ async function copySelection(){if(!state.selection)return;try{await navigator.cl
 function bindEvents(){
   for(const sel of ['#import-open','#open-import','#welcome-import'])$(sel).onclick=openImportDialog;
   $('#load-sample').onclick=async()=>{const text=`It was still raining when I left the bookshop.\n\nI had planned to go straight home, but I ran into an old friend near the station. We ended up talking for almost an hour.\n\n"You should drop by sometime," she said. "I'd love to catch up."\n\nI almost turned down her invitation. Then I thought, why not? Sometimes the smallest decisions change the course of your day.\n\nBy the time I got home, the rain had stopped and the city looked completely different.`;const b=makeBook('A Rainy Afternoon',text,'sample');state.books.push(b);await saveBook(b);await chooseBook(b.id);toast('연습용 짧은 글을 불러왔습니다.');};
-  $('#menu-toggle').onclick=()=>$('#sidebar').classList.toggle('open');
-  $('#notes-toggle').onclick=()=>$('#right-panel').classList.toggle('open');
-  $('#panel-close').onclick=()=>$('#right-panel').classList.remove('open');
-  $$('.tab').forEach(b=>b.onclick=()=>setTab(b.dataset.tab));
+  $('#menu-toggle').onclick=()=>{const sidebar=$('#sidebar'),opening=!sidebar.classList.contains('open');sidebar.classList.toggle('open',opening);if(opening)setSidebarCollapsed(false,false);};
+  $('#notes-toggle').onclick=()=>setTab('notes');
+  $('#panel-close').onclick=()=>setSidebarCollapsed(true);
+  $('#sidebar-collapse').onclick=()=>setSidebarCollapsed(!$('#sidebar').classList.contains('collapsed'));
+  $('.sidebar-nav-btn').forEach(b=>b.onclick=()=>setTab(b.dataset.section));
+  $('.tab').forEach(b=>b.onclick=()=>setTab(b.dataset.tab));
   $('#dialog-close').onclick=closeDialog;$('#dialog-overlay').onclick=e=>{if(e.target.id==='dialog-overlay')closeDialog();};
   $('#selection-annotate').onclick=()=>openAnnotationEditor();$('#selection-play').onclick=playSelection;$('#selection-copy').onclick=copySelection;
   elements.reader.addEventListener('click',onNoteAction);
@@ -1299,7 +1319,7 @@ function bindEvents(){
   $('#import-backup').onchange=async e=>{await importBackupFile(e.target.files?.[0]);e.target.value='';};
   $('#reader-pane').addEventListener('scroll',handlePosition);
   document.addEventListener('keydown',e=>{
-    if(e.key==='Escape'){closeDialog();hideSelectionBar();$('#sidebar').classList.remove('open');$('#right-panel').classList.remove('open');}
+    if(e.key==='Escape'){closeDialog();hideSelectionBar();$('#sidebar').classList.remove('open');}
     if(e.target.closest('input,textarea,select,[contenteditable]'))return;
     if(e.key.toLowerCase()==='n'&&state.selection){e.preventDefault();openAnnotationEditor();}
     if(e.key.toLowerCase()==='p'&&state.selection){e.preventDefault();playSelection();}
@@ -1309,7 +1329,9 @@ function bindEvents(){
 async function boot(){
   try{state.books=await listBooks();if(storageMode()==='memory')toast('브라우저 저장이 제한되어 학습 기록이 임시로만 유지됩니다. Git 동기화 또는 JSON 백업을 이용하세요.',true);}catch(e){toast('브라우저 저장소를 열지 못했습니다: '+e.message,true);}
   for(const book of state.books){book.audioTracks||=[];book.audioMappings||=[];book.wordAlignments||={};book.annotations||=[];book.blocks||=[];book.progress||={position:0,updatedAt:isoNow()};}
-  bindEvents();updateLibrary();
+  bindEvents();
+  try{setSidebarCollapsed(localStorage.getItem('margin-sidebar-collapsed')==='1',false);}catch{setSidebarCollapsed(false,false);}
+  updateLibrary();
   if(state.books.length){let remembered='';try{remembered=localStorage.getItem('margin-last-book')||'';}catch{}await chooseBook(state.books.find(b=>b.id===remembered)?.id||state.books[0].id);}
   else{setTitle();renderNotes();renderAudio();}
   if('serviceWorker' in navigator && location.protocol==='https:')navigator.serviceWorker.register('./sw.js').catch(()=>{});
