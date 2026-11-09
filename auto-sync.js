@@ -254,7 +254,7 @@ export async function discoverAndSync({text,bodyStart,tracks,loadBlob,transcribe
         const nextAudio=Math.min(duration,pos+(found?CLIP-3:SEARCH_STEP));
         const scan={
           found,trackId:track.id,foundTrackId:foundTrack,audioStart:foundAt,
-          nextAudio,cursor,bodyStart,updatedAt:new Date().toISOString(),complete:false
+          nextAudio,audioDuration:duration,cursor,bodyStart,updatedAt:new Date().toISOString(),complete:false
         };
         await save({trackId:track.id,words:matched.words,scan});
         metrics(found?'align':'search',end);
@@ -268,7 +268,7 @@ export async function discoverAndSync({text,bodyStart,tracks,loadBlob,transcribe
       // Store completion of this track, even if the anchor was not found yet.
       await save({trackId:track.id,words:[],scan:{
         found,trackId:track.id,foundTrackId:foundTrack,audioStart:foundAt,
-        nextAudio:duration,cursor,bodyStart,updatedAt:new Date().toISOString(),complete:false
+        nextAudio:duration,audioDuration:duration,cursor,bodyStart,updatedAt:new Date().toISOString(),complete:false
       }});
     }finally{await sampler.close();}
   }
