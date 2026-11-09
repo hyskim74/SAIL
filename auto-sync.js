@@ -256,6 +256,7 @@ export async function discoverAndSync({text,bodyStart,tracks,loadBlob,transcribe
           throw err;
         }
         pos=nextPos;
+        try{
         for(let lane=0;lane<batch.length;lane++){
           const {at,until,task}=batch[lane];
           const done=await task;asrMs+=done.elapsed;
@@ -300,6 +301,11 @@ export async function discoverAndSync({text,bodyStart,tracks,loadBlob,transcribe
           // A search batch may find the anchor midway. Align next from a
           // non-overlapping, committed position while retaining 3s overlap.
           pos=Math.max(pos,nextAudio);
+        }
+        }catch(err){
+          // Finish all already-started ASR jobs before cleanup or restart.
+          await Promise.all(batch.map(x=>x.task));
+          throw err;
         }
       }
       // Store completion of this track, even if the anchor was not found yet.
