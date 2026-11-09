@@ -1457,7 +1457,14 @@ async function runAutomaticBookSync(){
     marginAutoAbort=null;button.disabled=false;cancel.hidden=true;
     return toast('이 원서의 자동 싱크가 이미 완료되었습니다.',false);
   }
-  const startingState=scans[0]?.scan||null;
+  const latestScan=scans[0]?.scan||null;
+  // After a full unsuccessful search, allow an explicit retry from the start.
+  // Interrupted searches still resume at the next unprocessed audio window.
+  const exhausted=latestScan&&!latestScan.found&&
+    latestScan.trackId===b.audioTracks[b.audioTracks.length-1]?.id&&
+    Number.isFinite(latestScan.audioDuration)&&
+    latestScan.nextAudio>=latestScan.audioDuration-.2;
+  const startingState=exhausted?null:latestScan;
   // An earlier pending notes sync must not contend with on-device ASR.
   clearTimeout(state.syncTimers.get(b.id));state.syncTimers.delete(b.id);
   let checkpointsChanged=false;
