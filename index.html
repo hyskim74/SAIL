@@ -72,6 +72,30 @@
 .library-row:hover .book-delete,.library-row .book-delete:focus-visible{color:#a35e58}
 .library-row .book-delete:hover,.library-row .book-delete:focus-visible{background:#fae8e5;border-color:#eac1bb;color:#9c3f3b;outline-offset:2px}
 @media (max-width:1180px){.library-row .book-item{gap:8px}}
+
+/* Keep the bottom audio player exactly aligned with the topbar/workspace width.
+   Sidebar is part of the app layout but not part of the player. */
+#app .workspace .player{
+  left:var(--sidebar-expanded);
+  right:0;
+  width:auto;
+  transition:left .18s ease;
+}
+#app .sidebar.collapsed + .workspace .player{
+  left:var(--sidebar-rail);
+}
+@media (max-width:1180px) and (min-width:901px){
+  #app .workspace .player{left:310px}
+  #app .sidebar.collapsed + .workspace .player{left:var(--sidebar-rail)}
+}
+@media (max-width:900px){
+  #app .workspace .player,
+  #app .sidebar.collapsed + .workspace .player{
+    left:0;
+    right:0;
+    width:100%;
+  }
+}
 </style>
 </head>
 <body>
