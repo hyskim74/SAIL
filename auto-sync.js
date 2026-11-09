@@ -1,6 +1,13 @@
 // Margin Reader: automatic story-start discovery and progressive word sync.
-// Browser-only. No user-supplied audio timestamps. Large media uses streamed capture.
+// Browser-only. No manual audio timestamps. Fast range decoding where supported, safe playback fallback.
 export const CLIP=28,SEARCH_STEP=14;
+const FAST_MEDIA_URL='https://cdn.jsdelivr.net/npm/mediabunny@1.65.2/+esm';
+let fastMediaModule;
+async function loadFastMedia(){
+  if(!fastMediaModule)fastMediaModule=import(FAST_MEDIA_URL).catch(e=>{fastMediaModule=null;throw e;});
+  return fastMediaModule;
+}
+const clock=()=>typeof performance==='object'&&performance.now?performance.now():Date.now();
 const norm=s=>String(s||'').normalize('NFKC').replace(/[‘’´\x60]/g,"'").toLowerCase().replace(/[^a-z0-9]/g,'');
 export function tokensOf(text){return [...String(text).matchAll(/\S+/g)].map(m=>({text:m[0],word:norm(m[0]),startChar:m.index,endChar:m.index+m[0].length})).filter(w=>w.word);}
 export function matchingWords(text,chunks,maxCells=1200000){
@@ -44,7 +51,68 @@ function fromBuffer(buffer,start,end){
   return resample(out,rate);
 }
 export class BrowserAudioSampler{
-  constructor(blob,signal){this.blob=blob;this.signal=signal;this.media=null;this.url=null;this.ctx=null;this.decoder=null;this.processor=null;this.pendingStop=null;}
+  constructor(blob,signal){
+    this.blob=blob;this.signal=signal;this.media=null;this.url=null;
+    this.ctx=null;this.decoder=null;this.processor=null;this.pendingStop=null;
+    this.fastInput=null;this.fastSink=null;this.mode='realtime';
+  }
+  async enableFastDecoder(){
+    let input;
+    try{
+      const {Input,BlobSource,ALL_FORMATS,AudioSampleSink}=await loadFastMedia();
+      check(this.signal);
+      input=new Input({source:new BlobSource(this.blob),formats:ALL_FORMATS});
+      const track=await input.getPrimaryAudioTrack();
+      if(!track||!await track.canDecode())throw new Error('This device cannot decode this audio track with WebCodecs');
+      this.fastSink=new AudioSampleSink(track);
+      this.fastInput=input;this.mode='fast';
+    }catch(e){
+      input?.dispose();
+      if(this.signal?.aborted)check(this.signal);
+      // Keep the existing browser playback method for unsupported codecs/browsers.
+      console.info('Fast audiobook decoding unavailable; falling back to playback capture:',e);
+    }
+  }
+  async enableRealtimeDecoder(){
+    if(this.ctx)return;
+    const ctx=this.ctx=new (window.AudioContext||window.webkitAudioContext)();
+    const node=ctx.createMediaElementSource(this.media);
+    this.processor=ctx.createScriptProcessor(4096,2,1);
+    const silent=ctx.createGain();silent.gain.value=0;
+    node.connect(this.processor);this.processor.connect(silent);silent.connect(ctx.destination);
+    this.mode='realtime';
+  }
+  async fastClip(start,end){
+    const output=new Float32Array(Math.max(1,Math.round((end-start)*16000)));
+    let valid=0;
+    // Async iterator reads and decodes only compressed packets covering this clip.
+    // A little preroll ensures the sample crossing the left boundary is included.
+    for await(const sample of this.fastSink.samples(Math.max(0,start-.15),end+.03)){
+      try{
+        check(this.signal);
+        const rate=sample.sampleRate,frames=sample.numberOfFrames,channels=sample.numberOfChannels;
+        if(!rate||!frames||!channels)continue;
+        const planes=[];
+        for(let ch=0;ch<channels;ch++){
+          const p=new Float32Array(frames);
+          sample.copyTo(p,{planeIndex:ch,format:'f32-planar'});
+          planes.push(p);
+        }
+        const from=Math.max(0,Math.ceil((sample.timestamp-start)*16000));
+        const to=Math.min(output.length,Math.ceil((sample.timestamp+sample.duration-start)*16000));
+        for(let j=from;j<to;j++){
+          const x=(start+j/16000-sample.timestamp)*rate;
+          if(x<0||x>=frames)continue;
+          const i=Math.floor(x),next=Math.min(frames-1,i+1),frac=x-i;
+          let mixed=0;
+          for(const p of planes)mixed+=p[i]*(1-frac)+p[next]*frac;
+          output[j]=mixed/channels;valid++;
+        }
+      }finally{sample.close();}
+    }
+    if(valid<Math.min(1600,output.length*.5))throw new Error('Fast decoder produced too little audio');
+    return output;
+  }
   async open(){
     check(this.signal);
     const m=document.createElement(/^video\//.test(this.blob.type)?'video':'audio');
@@ -60,12 +128,10 @@ export class BrowserAudioSampler{
       let ctx;try{ctx=new (window.AudioContext||window.webkitAudioContext)();this.decoder=await ctx.decodeAudioData(await this.blob.arrayBuffer());}
       catch{this.decoder=null;}finally{if(ctx)await ctx.close().catch(()=>{});}
     }
-    if(!this.decoder){
-      this.ctx=new (window.AudioContext||window.webkitAudioContext)();
-      const node=this.ctx.createMediaElementSource(m);
-      this.processor=this.ctx.createScriptProcessor(4096,2,1);
-      const silent=this.ctx.createGain();silent.gain.value=0;
-      node.connect(this.processor);this.processor.connect(silent);silent.connect(this.ctx.destination);
+    if(this.decoder)this.mode='buffer';
+    else{
+      await this.enableFastDecoder();
+      if(!this.fastSink)await this.enableRealtimeDecoder();
     }
     return this.duration;
   }
@@ -73,6 +139,15 @@ export class BrowserAudioSampler{
     check(this.signal);start=Math.max(0,start);end=Math.min(this.duration,end);
     if(end<=start)throw new Error('음원 끝에 도달했습니다.');
     if(this.decoder)return fromBuffer(this.decoder,start,end);
+    if(this.fastSink){
+      try{return await this.fastClip(start,end);}
+      catch(e){
+        if(this.signal?.aborted)check(this.signal);
+        console.warn('Fast range decoding failed; using compatible playback fallback:',e);
+        this.fastInput?.dispose();this.fastInput=null;this.fastSink=null;
+        await this.enableRealtimeDecoder();
+      }
+    }
     const m=this.media,ctx=this.ctx,proc=this.processor;
     m.pause();
     await new Promise((resolve,reject)=>{
@@ -108,55 +183,95 @@ export class BrowserAudioSampler{
       m.play().catch(e=>finish(new Error('브라우저가 음원 자동 재생을 차단했습니다. 재생 버튼을 한 번 누른 후 다시 시도해 주세요: '+e.message)));
     });
   }
-  async close(){this.pendingStop?.();this.media?.pause();if(this.processor)this.processor.onaudioprocess=null;try{await this.ctx?.close();}catch{}if(this.url)URL.revokeObjectURL(this.url);this.media?.removeAttribute('src');this.media?.load();}
+  async close(){
+    this.pendingStop?.();this.fastInput?.dispose();this.fastInput=null;this.fastSink=null;
+    this.media?.pause();if(this.processor)this.processor.onaudioprocess=null;
+    try{await this.ctx?.close();}catch{}
+    if(this.url)URL.revokeObjectURL(this.url);
+    this.media?.removeAttribute('src');this.media?.load();
+  }
 }
 export async function discoverAndSync({text,bodyStart,tracks,loadBlob,transcribe,progress=()=>{},onMetrics=()=>{},save=async()=>{},signal,startingState=null}){
   const anchor=tokensOf(text.slice(bodyStart)).slice(0,26);
   if(anchor.length<8)throw new Error('본문 시작 표시 뒤에 최소 8개 이상의 영어 단어가 필요합니다.');
   const anchorText=text.slice(bodyStart,bodyStart+anchor.at(-1).endChar);
-  let found=Boolean(startingState?.found),cursor=startingState?.cursor??bodyStart;
-  let foundTrack=startingState?.trackId??null,foundAt=startingState?.audioStart??null,aligned=0;
-  const first=found?Math.max(0,tracks.findIndex(t=>t.id===foundTrack)):0;
+  const validResume=startingState&&(!Number.isFinite(startingState.bodyStart)||startingState.bodyStart===bodyStart);
+  const state=validResume?startingState:null;
+  let found=Boolean(state?.found),cursor=state?.cursor??bodyStart;
+  let foundTrack=found?(state.foundTrackId||state.trackId):null;
+  let foundAt=state?.audioStart??null,aligned=0;
+  const resumeIndex=state?.trackId?tracks.findIndex(t=>t.id===state.trackId):-1;
+  const first=Math.max(0,resumeIndex);
+  let decodeMs=0,asrMs=0,matchMs=0,segments=0;
   for(let index=first;index<tracks.length;index++){
     check(signal);const track=tracks[index],blob=await loadBlob(track);
-    if(!blob){progress('이 기기에 오디오 파일이 없습니다: '+track.name+' · Private Data에서 복원하세요.');onMetrics({phase:'missing',trackId:track.id,trackName:track.name,trackIndex:index+1,trackCount:tracks.length,bodyStart,cursor,totalChars:text.length});continue;}
+    if(!blob){
+      progress('이 기기에 오디오 파일이 없습니다: '+track.name+' · Private Data에서 복원하세요.');
+      onMetrics({phase:'missing',trackId:track.id,trackName:track.name,trackIndex:index+1,trackCount:tracks.length,bodyStart,cursor,totalChars:text.length});
+      continue;
+    }
     const sampler=new BrowserAudioSampler(blob,signal);
     try{
       const duration=await sampler.open();
-      onMetrics({phase:found?'align':'search',trackId:track.id,trackName:track.name,trackIndex:index+1,trackCount:tracks.length,audioPosition:0,audioDuration:duration,bodyStart,cursor,totalChars:text.length});
-      let pos=found&&track.id===foundTrack?(startingState?.nextAudio??0):0;
-      const step=found?CLIP-3:SEARCH_STEP;
+      let pos=index===resumeIndex?Math.max(0,Number(state.nextAudio)||0):0;
+      pos=Math.min(duration,Math.max(0,pos));
+      const metrics=(phase,audioPosition,extra={})=>onMetrics({
+        phase,trackId:track.id,trackName:track.name,trackIndex:index+1,trackCount:tracks.length,
+        audioPosition,audioDuration:duration,bodyStart,cursor,totalChars:text.length,aligned,
+        decoderMode:sampler.mode,decodeMs,asrMs,matchMs,segments,...extra
+      });
+      metrics(found?'align':'search',pos);
       while(pos<duration-.2){
         check(signal);
+        const step=found?CLIP-3:SEARCH_STEP;
         const end=Math.min(duration,pos+CLIP);
         progress((found?'단어 정렬: ':'본문 시작 자동 검색: ')+track.name+' · '+Math.floor(pos)+' / '+Math.floor(duration)+'초');
-        onMetrics({phase:found?'align':'search',trackId:track.id,trackName:track.name,trackIndex:index+1,trackCount:tracks.length,audioPosition:pos,audioDuration:duration,bodyStart,cursor,totalChars:text.length,aligned});
+        metrics(found?'align':'search',pos);
+        let started=clock();
         const wave=await sampler.clip(pos,end);check(signal);
+        decodeMs+=clock()-started;
+        started=clock();
         const result=await transcribe(wave);check(signal);
+        asrMs+=clock()-started;
         const chunks=Array.isArray(result)?result:(result?.chunks||[]);
+        started=clock();
         if(!found){
           const hit=identifyAnchor(anchorText,chunks);
-          if(hit){found=true;foundTrack=track.id;foundAt=pos+hit.audioStart;cursor=bodyStart;
+          if(hit){
+            found=true;foundTrack=track.id;foundAt=pos+hit.audioStart;cursor=bodyStart;
             progress('본문 시작 발견: '+track.name+' · '+foundAt.toFixed(1)+'초. 자동 정렬 시작.');
-            onMetrics({phase:'align',trackId:track.id,trackName:track.name,trackIndex:index+1,trackCount:tracks.length,audioPosition:pos,audioDuration:duration,bodyStart,cursor,totalChars:text.length,aligned});
+            metrics('align',pos);
           }
         }
+        let matched={words:[],cursor};
         if(found){
-          const matched=alignNextWindow(text,bodyStart,cursor,chunks,pos);
-          cursor=Math.max(cursor,matched.cursor);aligned+=matched.words.length;
-          await save({trackId:track.id,words:matched.words,scan:{found:true,trackId:track.id,audioStart:foundAt,nextAudio:Math.max(pos+step,end-3),cursor,updatedAt:new Date().toISOString(),complete:false}});
-          onMetrics({phase:'align',trackId:track.id,trackName:track.name,trackIndex:index+1,trackCount:tracks.length,audioPosition:end,audioDuration:duration,bodyStart,cursor,totalChars:text.length,aligned});
-          if(cursor>=text.length-2){
-            await save({trackId:track.id,words:[],scan:{found:true,trackId:track.id,audioStart:foundAt,nextAudio:end,cursor,updatedAt:new Date().toISOString(),complete:true}});
-            onMetrics({phase:'complete',trackId:track.id,trackName:track.name,trackIndex:index+1,trackCount:tracks.length,audioPosition:end,audioDuration:duration,bodyStart,cursor:Math.max(cursor,text.length),totalChars:text.length,aligned});
-            return {found,foundTrack,foundAt,cursor,aligned,complete:true};
-          }
+          matched=alignNextWindow(text,bodyStart,cursor,chunks,pos);
+          cursor=Math.max(cursor,matched.cursor);
+          aligned+=matched.words.length;
         }
-        pos+=found?CLIP-3:SEARCH_STEP;
+        matchMs+=clock()-started;segments++;
+        // Checkpoint the NEXT safe start after this successfully processed clip.
+        const nextAudio=Math.min(duration,pos+(found?CLIP-3:SEARCH_STEP));
+        const scan={
+          found,trackId:track.id,foundTrackId:foundTrack,audioStart:foundAt,
+          nextAudio,cursor,bodyStart,updatedAt:new Date().toISOString(),complete:false
+        };
+        await save({trackId:track.id,words:matched.words,scan});
+        metrics(found?'align':'search',end);
+        if(found&&cursor>=text.length-2){
+          await save({trackId:track.id,words:[],scan:{...scan,nextAudio:end,complete:true}});
+          metrics('complete',end);
+          return {found,foundTrack,foundAt,cursor,aligned,complete:true,decodeMs,asrMs,matchMs,segments};
+        }
+        pos=nextAudio;
       }
-      if(found)await save({trackId:track.id,words:[],scan:{found:true,trackId:track.id,audioStart:foundAt,nextAudio:duration,cursor,updatedAt:new Date().toISOString(),complete:cursor>=text.length-2}});
+      // Store completion of this track, even if the anchor was not found yet.
+      await save({trackId:track.id,words:[],scan:{
+        found,trackId:track.id,foundTrackId:foundTrack,audioStart:foundAt,
+        nextAudio:duration,cursor,bodyStart,updatedAt:new Date().toISOString(),complete:false
+      }});
     }finally{await sampler.close();}
   }
   if(!found)throw new Error('표시한 본문 시작 문장을 자동으로 찾지 못했습니다. 원서와 Audiobook이 같은 판본인지 확인하세요.');
-  return {found,foundTrack,foundAt,cursor,aligned,complete:false};
+  return {found,foundTrack,foundAt,cursor,aligned,complete:false,decodeMs,asrMs,matchMs,segments};
 }
