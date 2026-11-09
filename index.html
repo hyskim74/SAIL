@@ -45,14 +45,15 @@
         <section id="notes-panel" class="panel-body active"><div class="help-note">원문에서 단어 또는 문장 범위를 드래그하면 주석을 작성할 수 있습니다.</div><input id="note-filter" class="text-input" placeholder="Search notes..." aria-label="주석 검색"><div id="notes-list" class="notes-list"></div></section>
         <section id="audio-panel" class="panel-body">
           <div class="small-label">AUDIO FILES</div><label class="upload-tile">＋ Add MP3 / M4A / WAV / MP4 (Private Data)<input id="audio-upload" type="file" accept="audio/*,video/mp4,.mp3,.m4a,.wav,.ogg,.mp4,.m4v" multiple hidden></label><div class="help-note">Audiobook은 Private Data에 저장합니다. GitHub Data 전용 토큰을 연결하세요. 1GiB (1,024MiB)를 초과하는 파일은 나눠서 등록해야 합니다.</div><div id="audio-list" class="audio-list"></div><video id="audio-el" class="media-preview" aria-label="MP4 영상 및 음성 재생" preload="metadata" playsinline controls hidden></video><p id="video-help" class="fine-text" hidden>MP4는 브라우저에서 영상과 음성을 함께 재생합니다. 파일에 오디오 트랙이 있어야 소리가 나며, 지원 코덱은 브라우저에 따라 다릅니다.</p>
-          <div class="small-label">IN-BROWSER AUTO ALIGNMENT</div>
-          <div class="help-note">원문 구간을 선택하고, 대응하는 오디오의 시작·종료 시각을 지정하세요. 음성 인식과 매칭은 <strong>브라우저 안에서</strong> 처리합니다. 첫 실행에만 음성 모델 다운로드가 필요하며, 한 번에 최대 180초를 정렬할 수 있습니다.</div>
-          <div class="input-pair"><label class="field-label">Audio from (seconds)<input class="text-input" type="number" id="align-start" min="0" step="0.1" value="0"></label><label class="field-label">Audio to (seconds)<input class="text-input" type="number" id="align-end" min="0" step="0.1" placeholder="예: 90"></label></div>
-          <button class="primary-outline wide" id="auto-align">✧ Align in browser — no server</button>
-          <p id="alignment-status" class="fine-text" role="status">음성과 원문이 일부 다르면 해당 단어의 타임스탬프는 생성하지 않습니다. 결과를 듣고 필요 시 수동 보정하세요.</p>
-          <div class="small-label">MANUAL TIMING</div>
-          <div class="input-pair"><label class="field-label">Start (seconds)<input class="text-input" type="number" id="manual-start" min="0" step="0.01" placeholder="0.00"></label><label class="field-label">End (seconds)<input class="text-input" type="number" id="manual-end" min="0" step="0.01" placeholder="4.20"></label></div>
-          <button class="secondary-btn wide" id="save-manual">Save timing for selection</button><label class="field-label">Playback margin (seconds)<input id="playback-pad" type="number" class="text-input" min="0" max="3" step="0.1" value="0" title="선택 구간 재생 앞뒤로 추가할 여유 시간"></label>
+
+          <div class="small-label">AUTO DISCOVERY & WORD SYNC</div>
+          <div class="help-note">① 원서의 Preface/Prelude가 아닌 <strong>본문 첫 문장</strong>을 드래그하고 아래 '본문 시작 표시'를 누르세요. ② 자동 탐색을 시작하면 Audiobook에서 일치하는 위치를 스스로 찾고, 이후 내용을 순차적으로 단어별 정렬합니다. <strong>오디오 시간 입력은 필요하지 않습니다.</strong> PC에서 브라우저 탭을 열어둔 채 실행하세요.</div>
+          <button class="secondary-btn wide" id="mark-body-start">① 본문 시작 표시 (선택한 문장의 첫 단어)</button>
+          <p class="fine-text" id="body-start-status" role="status">아직 본문 시작이 지정되지 않았습니다.</p>
+          <button class="primary-outline wide" id="auto-align">② 본문 시작 자동 검색 + 전체 단어 싱크</button>
+          <button class="secondary-btn wide" id="cancel-auto-align" hidden>■ 자동 싱크 중단 (진행 기록 유지)</button>
+          <p class="fine-text" id="alignment-status" role="status">시작 위치를 자동으로 찾아 싱크를 진행합니다. MP4 및 대용량 파일은 브라우저에서 실제 재생하면서 분석하므로 오래 걸릴 수 있습니다. 확인되지 않은 단어에는 시간을 만들지 않습니다.</p>
+          <label class="field-label">Playback margin (seconds)<input id="playback-pad" type="number" class="text-input" min="0" max="3" step="0.1" value="0"></label>
           <div id="timings-list" class="timings-list"></div>
         </section>
         <section id="search-panel" class="panel-body"><div class="help-note">원문에서 단어나 표현을 검색합니다.</div><input id="document-search" class="text-input" placeholder="Search in this book"><div id="search-results" class="notes-list"></div></section>
@@ -65,6 +66,7 @@
 <div id="dialog-overlay" class="dialog-overlay" hidden><div class="dialog" role="dialog" aria-modal="true" aria-labelledby="dialog-title"><div class="dialog-top"><h2 id="dialog-title">Dialog</h2><button id="dialog-close" class="icon-btn" aria-label="닫기">✕</button></div><div id="dialog-content"></div></div></div>
 <div id="toast" role="status" class="toast" hidden></div>
 <script type="module">
+import { discoverAndSync, mergeAutomaticWords } from "./auto-sync.js";
 
 // ===== model.js =====
 const uuid = () => (globalThis.crypto?.randomUUID?.() ?? `id-${Date.now()}-${Math.random().toString(16).slice(2)}`);
@@ -534,7 +536,7 @@ class AudioController{
   }
   async playSelection(start,end,pad=0){
     const span=this.timeForRange(start,end);
-    if(!span)return {ok:false,message:'선택 구간에 일치하는 단어별 타임스탬프 또는 정확한 수동 구간이 없습니다.'};
+    if(!span)return {ok:false,message:'아직 이 구간이 자동으로 싱크되지 않았습니다. Audiobook에서 자동 싱크를 시작하거나 이어 진행하세요.'};
     if(!this.audio.src)return {ok:false,message:'먼저 해당 오디오 파일을 이 기기에 업로드하세요.'};
     this.range={start:Math.max(0,span.start-pad),end:Math.min(this.audio.duration||Infinity,span.end+pad)};
     this.audio.currentTime=this.range.start;
@@ -960,7 +962,8 @@ function openEditSource(){
 }
 function renderAudio(){
   const list=$('#audio-list'),times=$('#timings-list');list.replaceChildren();times.replaceChildren();const b=state.book;
-  if(!b){list.innerHTML='<div class="empty-mini">책을 선택하세요.</div>';return;}
+  if(!b){list.innerHTML='<div class="empty-mini">책을 선택하세요.</div>';showBodyStart();return;}
+  showBodyStart();
   const tracks=b.audioTracks||[];
   if(!tracks.length)list.innerHTML='<div class="empty-mini">아직 등록된 오디오 파일이 없습니다.</div>';
   for(const t of tracks){
@@ -989,16 +992,6 @@ async function setActiveTrack(id,announce=true){
   state.activeTrack=id;
   const okay=await player.useTrack(state.book,id);
   renderAudio();
-  if(okay){
-    const audio=player.audio;
-    const updateEnd=()=>{
-      if(Number.isFinite(audio.duration)&&audio.duration>0){
-        $('#align-start').value='0';
-        $('#align-end').value=String(Math.min(180,Math.floor(audio.duration*10)/10));
-      }
-    };
-    if(audio.readyState>=1)updateEnd();else audio.addEventListener('loadedmetadata',updateEnd,{once:true});
-  }
   if(announce&&!okay){const t=state.book.audioTracks.find(t=>t.id===id);
     if(t?.remote&&gitReady())await downloadAudioUi(state.book,t);
     else toast(t?.remote?'Private Data에 연결한 뒤 ↓ 버튼으로 복원하세요.':'오디오를 등록해 주세요.',true);}
@@ -1029,50 +1022,80 @@ async function playSelection(){
   const pad=Math.max(0,Math.min(3,Number($('#playback-pad').value)||0));const r=await player.playSelection(sel.start,sel.end,pad);
   if(!r.ok){setTab('audio');toast(r.message,true);}else toast(`선택 구간 재생 (${r.span.type==='manual'?'수동 구간':'단어별 싱크'})`);
 }
-function manualTiming(){
-  const b=state.book,sel=state.selection;if(!b||!sel){toast('원문에서 저장할 구간을 먼저 선택하세요.',true);return;}
-  if(!state.activeTrack){toast('Audiobook 파일을 선택하세요.',true);return;}
-  const start=Number($('#manual-start').value),end=Number($('#manual-end').value);
-  if(!Number.isFinite(start)||!Number.isFinite(end)||end<=start||start<0||$('#manual-start').value===''||$('#manual-end').value===''){toast('시작·종료 시간을 초 단위로 올바르게 입력하세요.',true);return;}
-  const duration=player.audio.duration;if(Number.isFinite(duration)&&end>duration+.3){toast('종료 시간이 오디오 길이를 넘습니다.',true);return;}
-  const existing=b.audioMappings.find(m=>!m.deletedAt&&m.trackId===state.activeTrack&&m.startChar===sel.start&&m.endChar===sel.end);
-  if(existing){existing.start=start;existing.end=end;existing.updatedAt=isoNow();}
-  else b.audioMappings.push({id:uuid(),trackId:state.activeTrack,startChar:sel.start,endChar:sel.end,start,end,quote:sel.quote,updatedAt:isoNow(),deletedAt:null});
-  scheduleSave();renderAudio();toast('선택 구간의 오디오 시간을 저장했습니다.');
+let marginAutoAbort=null;
+function bodyStartPosition(){const n=state.book?.progress?.bodyStart;return Number.isInteger(n)&&n>=0?n:null;}
+function showBodyStart(){
+  const label=$('#body-start-status');if(!label)return;
+  const pos=bodyStartPosition();
+  label.textContent=pos===null?'본문 첫 문장을 원문에서 드래그한 다음 ① 본문 시작 표시를 누르세요.':
+    '본문 시작 등록됨: “'+bookText(state.book).slice(pos,pos+115).replace(/\s+/g,' ').trim()+'…”';
+  const btn=$('#auto-align');
+  if(btn)btn.textContent=(state.book?.audioTracks||[]).some(t=>state.book?.wordAlignments?.[t.id]?.scan?.found)?'② 자동 단어 싱크 이어하기':'② 본문 시작 자동 검색 + 전체 단어 싱크';
 }
-async function alignSelection(){
-  const b=state.book,sel=state.selection;
-  if(!b||!sel){toast('먼저 오디오에 대응하는 영어 본문 범위를 드래그하세요.',true);return;}
-  if(!state.activeTrack){toast('먼저 Audiobook 파일을 선택하세요.',true);return;}
-  const blob=await getAudio(state.activeTrack);
-  if(!blob){toast('Audiobook 탭의 ↓ 버튼을 눌러 Data에서 오디오를 복원하세요.',true);return;}
-  const start=Number($('#align-start').value),end=Number($('#align-end').value);
-  if($('#align-start').value.trim()===''||$('#align-end').value.trim()===''||
-     !Number.isFinite(start)||!Number.isFinite(end)||start<0||end<=start){
-    toast('오디오의 시작·종료 시각을 초 단위로 입력하세요.',true);return;
-  }
-  if(end-start>180){toast('브라우저 정렬은 한 번에 180초까지 가능합니다. 더 짧은 구간으로 나누어 주세요.',true);return;}
-  if(!confirm('선택한 영어 원문이 지정된 오디오 구간에 대응하나요? 첫 사용 시 Whisper 모델을 내려받습니다. 오디오 파일은 외부 서버에 업로드하지 않습니다.'))return;
-  const button=$('#auto-align');button.disabled=true;
-  const status=$('#alignment-status');
+function markBodyStart(){
+  if(marginAutoAbort)return toast('진행 중인 자동 싱크를 중단한 뒤 시작점을 변경하세요.',true);
+  if(!state.book||!state.selection)return toast('원서 본문의 첫 단어 또는 첫 문장을 드래그하세요.',true);
+  const b=state.book;
+  const index=state.selection.start,full=bookText(b);
+  if(!full.slice(index).trim())return toast('본문 시작 위치를 다시 선택하세요.',true);
+  const old=b.progress?.bodyStart;
+  if(old!==index){b.wordAlignments={};b.audioMappings=[];}
+  b.progress={...(b.progress||{}),bodyStart:index,updatedAt:isoNow()};
+  scheduleSave();showBodyStart();hideSelectionBar();toast('본문 시작만 저장했어. 오디오는 앱이 자동으로 찾습니다.');
+}
+async function runAutomaticBookSync(){
+  const b=state.book;
+  if(!b)return toast('먼저 원서를 불러오세요.',true);
+  if(marginAutoAbort)return toast('자동 싱크가 이미 진행 중입니다.',true);
+  const bodyStart=bodyStartPosition();
+  if(bodyStart===null)return toast('본문 시작 문장을 드래그한 뒤 ① 본문 시작 표시를 눌러 주세요.',true);
+  if(!b.audioTracks?.length)return toast('먼저 Audiobook 파일을 등록하세요.',true);
+  const ctl=new AbortController();marginAutoAbort=ctl;
+  const button=$('#auto-align'),cancel=$('#cancel-auto-align'),status=$('#alignment-status');
+  button.disabled=true;cancel.hidden=false;
+  const notes=bookText(b),progress=message=>{status.textContent=message;};
+  const existing=b.audioTracks.map(t=>({track:t,scan:b.wordAlignments?.[t.id]?.scan}))
+    .find(x=>x.scan?.found&&!x.scan?.complete);
+  const startingState=existing?.scan||null;
   try{
-    const result=await alignAudioInBrowser(blob,bookText(b).slice(sel.start,sel.end),start,end, msg=>status.textContent=msg);
-    if(!result.words.length||result.coverage<0.45)
-      throw new Error(`원문과 음성의 일치율이 ${Math.round(result.coverage*100)}%로 낮아 저장하지 않았습니다. 올바른 구간인지 확인하세요.`);
-    const incoming=result.words.map(w=>({...w,startChar:w.startChar+sel.start,endChar:w.endChar+sel.start}));
-    const previous=b.wordAlignments[state.activeTrack]?.words||[];
-    const old=previous.filter(w=>w.endChar<=sel.start||w.startChar>=sel.end);
-    const warnings=[];
-    if(result.coverage<0.95)warnings.push(`원문 단어 중 ${result.total-incoming.length}개 타임스탬프를 생성하지 못했습니다.`);
-    b.wordAlignments[state.activeTrack]={
-      words:[...old,...incoming].sort((a,c)=>a.startChar-c.startChar),
-      updatedAt:isoNow(),source:'browser-whisper-asr',warnings
-    };
-    scheduleSave();renderAudio();
-    status.textContent=`완료: ${incoming.length}/${result.total}개 단어 연결 (${Math.round(result.coverage*100)}%). 인식된 음성을 비교한 결과이며 정확한 Forced Alignment는 아닙니다. 실제로 들어보고 보정하세요.`;
-    toast(`브라우저에서 ${incoming.length}개 단어를 연결했습니다.`);
-  }catch(e){status.textContent='정렬 실패: '+e.message;toast('자동 정렬 실패: '+e.message,true);}
-  finally{button.disabled=false;}
+    progress('Whisper 음성 인식 모델 준비 중… 첫 실행에는 다운로드가 필요합니다.');
+    const pipe=await recognizer(progress);
+    if(ctl.signal.aborted)throw new DOMException('취소됨','AbortError');
+    const data=await discoverAndSync({
+      text:notes,bodyStart,tracks:b.audioTracks,signal:ctl.signal,startingState,
+      loadBlob:async track=>{
+        let blob=await getAudio(track.id);
+        if(!blob&&track.remote&&gitReady()){
+          progress('Private Data에서 Audiobook 복원 중: '+track.name);
+          await downloadTrackFromPrivateData(b,track);
+          blob=await getAudio(track.id);
+        }
+        return blob;
+      },
+      transcribe:async audio=>{
+        const r=await pipe(audio,{return_timestamps:'word',language:'english',task:'transcribe'});
+        return r?.chunks||[];
+      },
+      progress,
+      save:async ({trackId,words,scan})=>{
+        const existing=b.wordAlignments[trackId]||{words:[]};
+        b.wordAlignments[trackId]={...existing,words:mergeAutomaticWords(existing.words||[],words),
+          scan:{...scan,bodyStart},source:'browser-whisper-auto',updatedAt:isoNow()};
+        scheduleSave();showBodyStart();
+        if(words.length)progress('본문 자동 싱크 진행: '+b.wordAlignments[trackId].words.length+'개 단어 연결 · 오디오 '+Math.floor(scan.nextAudio)+'초');
+      }
+    });
+    if(data.foundTrack){state.activeTrack=data.foundTrack;await setActiveTrack(data.foundTrack,false);}
+    renderAudio();
+    progress(data.complete?'책 끝까지 자동 싱크 완료. 정확하지 않은 단어는 자동으로 제외했습니다.':
+      '오디오 자동 검색과 정렬 가능한 구간을 처리했습니다. 단어 '+data.aligned+'개 연결. 추가 음원이 있다면 등록해 주세요.');
+    toast('자동 싱크 결과를 저장했습니다.');
+  }catch(e){
+    if(ctl.signal.aborted||e.name==='AbortError')progress('자동 싱크를 중단했습니다. 현재까지 찾은 결과는 저장되며 다음에 이어서 진행할 수 있습니다.');
+    else{progress('자동 싱크 오류: '+e.message);toast(e.message,true);}
+  }finally{
+    marginAutoAbort=null;button.disabled=false;cancel.hidden=true;renderAudio();showBodyStart();
+  }
 }
 function renderSearch(){const list=$('#search-results');list.replaceChildren();const q=$('#document-search').value.trim();if(!state.book||!q){list.innerHTML='<div class="empty-mini">검색어를 입력하세요.</div>';return;}
   const text=bookText(state.book);let pos=0,n=0;const lq=q.toLowerCase(),lt=text.toLowerCase();
@@ -1201,9 +1224,9 @@ function bindEvents(){
   document.addEventListener('mousedown',e=>{if(!e.target.closest('#selection-toolbar,.reader-content'))hideSelectionBar();});
   $('#note-filter').oninput=renderNotes;$('#document-search').oninput=renderSearch;
   $('#audio-upload').onchange=async e=>{try{await addAudioFiles([...e.target.files]);}catch(err){toast('오디오 저장 실패: '+err.message,true);}e.target.value='';};
-  $('#manual-start').addEventListener('focus',()=>hideSelectionBar());
-  $('#manual-end').addEventListener('focus',()=>hideSelectionBar());
-  $('#save-manual').onclick=manualTiming;$('#auto-align').onclick=alignSelection;
+  $('#mark-body-start').onclick=markBodyStart;
+  $('#auto-align').onclick=runAutomaticBookSync;
+  $('#cancel-auto-align').onclick=()=>marginAutoAbort?.abort();
   $('#player-selection').onclick=playSelection;
   $('#decrease-font').onclick=()=>{if(!state.book)return;state.book.fontSize=Math.max(14,(state.book.fontSize||19)-1);setTitle();scheduleSave();};
   $('#increase-font').onclick=()=>{if(!state.book)return;state.book.fontSize=Math.min(30,(state.book.fontSize||19)+1);setTitle();scheduleSave();};
