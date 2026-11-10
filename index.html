@@ -632,6 +632,12 @@ async function claimRemoteSyncRun(book,runId){
     if(lease?.id!==runId&&lease?.id&&Date.now()-Date.parse(lease.at||0)<CROSS_DEVICE_LEASE_MS){
       if(!confirm('다른 기기에서 최근 자동 싱크를 수행했습니다. 현재 기기로 작업을 넘겨받을까요?\n\n다른 기기가 계속 실행 중이면 작업이 중단될 수 있습니다.'))throw new Error('다른 기기의 자동 싱크를 유지했습니다.');
     }
+    const remoteScans=Object.values(remote.data?.wordAlignments||{}).map(x=>x?.scan).filter(Boolean);
+    const localReset=Object.values(book.wordAlignments||{}).some(x=>x?.source==='automatic-sync-reset'&&
+      (!remoteScans.length||String(x.updatedAt||'')>String(remoteScans[0].updatedAt||'')));
+    if(!localReset&&remoteScans.some(x=>Number.isInteger(x.bodyStart)&&
+       Number.isInteger(book.progress?.bodyStart)&&x.bodyStart!==book.progress.bodyStart))
+      throw new Error('Data에 저장된 본문 시작 위치와 현재 책의 시작 위치가 다릅니다. Data에서 최신 기록을 불러오거나 기존 싱크 삭제 후 다시 시작하세요.');
     if(remote.data)mergeGitDataset(book,remote.data,'alignment');
     if((book.audioTracks||[]).some(t=>book.wordAlignments?.[t.id]?.scan?.complete))
       return {claimed:false,complete:true};
@@ -1703,6 +1709,9 @@ async function runAutomaticBookSync(){
     }else{
       progress('Data 연결이 없어 이 기기에만 싱크가 저장됩니다. 다른 기기에서 이용하려면 Settings & sync에서 먼저 연결하세요.');
     }
+    const currentTrack=b.audioTracks.find(t=>t.id===startingState?.trackId)||b.audioTracks[0];
+    if(currentTrack&&!currentTrack.remote&&!await getAudio(currentTrack.id))
+      throw new Error('이 기기에 이어서 사용할 Audiobook 파일이 없습니다. 같은 음원을 추가하거나 Data에 백업된 파일을 복원하세요.');
     if(ctl.signal.aborted)throw new DOMException('취소됨','AbortError');
     progress('Whisper 음성 인식 모델 준비 중… 첫 실행에는 다운로드가 필요합니다.');
     const pipe=await recognizer(progress);
