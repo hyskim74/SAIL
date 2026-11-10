@@ -188,6 +188,7 @@
             </select>
           </label>
           <button class="primary-outline wide" id="auto-align">② 본문 시작 자동 검색 + 전체 단어 싱크</button>
+          <button class="secondary-btn wide" id="restore-cross-device-sync">↓ 다른 기기 싱크 불러오기 (Data)</button>
           <button class="secondary-btn wide" id="cancel-auto-align" hidden>■ 자동 싱크 중단 (진행 기록 유지)</button>
           <button class="secondary-btn wide" id="reset-auto-align">↺ 기존 자동 싱크 삭제하고 처음부터 다시 시작</button>
           <p class="fine-text" id="alignment-status" role="status">시작 위치를 자동으로 찾아 싱크합니다. 가능한 파일은 고속 디코딩하고, 미지원 형식만 실시간 재생 방식으로 처리합니다. 병렬 2개는 메모리 사용량이 증가하므로 모바일에서 오류가 나면 1개로 바꾸세요.</p>
@@ -1593,6 +1594,7 @@ async function runAutomaticBookSync(){
   if(marginAutoAbort)return toast('자동 싱크가 이미 진행 중입니다.',true);
   const bodyStart=bodyStartPosition();
   if(bodyStart===null)return toast('본문 시작 문장을 드래그한 뒤 ① 본문 시작 표시를 눌러 주세요.',true);
+  if(!b.blocks?.length)return toast('다른 기기의 싱크를 이어하려면 동일한 원서 파일을 Import a book에서 연결하세요.',true);
   if(!b.audioTracks?.length)return toast('먼저 Audiobook 파일을 등록하세요.',true);
   const ctl=new AbortController();marginAutoAbort=ctl;
   const button=$('#auto-align'),cancel=$('#cancel-auto-align'),status=$('#alignment-status');
@@ -1803,8 +1805,9 @@ function openGitSettings(){
       await ensurePrivateData();
       const saved=await rememberGitToken();
       $('#git-token').value='';
-      $('#git-status').textContent=saved?'인증정보가 이 기기에 저장되었습니다. 메모 동기화 중…':'메모 동기화 중… (토큰 자동 복원은 사용 불가)';
-      if(state.book)await syncCurrent(true);else await listRemoteBooks();
+      $('#git-status').textContent=saved?'인증정보 저장됨 · 다른 기기 기록 확인 중…':'다른 기기 기록 확인 중… (토큰 자동 복원은 사용 불가)';
+      if(!marginAutoAbort)await restoreRemoteLibrary(message=>$('#git-status').textContent=message);
+      if(state.book&&!marginAutoAbort)await syncCurrent(true);
       if(state.book){
         for(const t of state.book.audioTracks||[]){
           if(!t.remote&&await getAudio(t.id)){
@@ -1836,29 +1839,9 @@ function openGitSettings(){
       await ensurePrivateData();
       await rememberGitToken();
       $('#git-token').value='';
-      const list=await listRemoteBooks();if(!list.length){$('#git-status').textContent='원격 도서 목록이 없습니다.';return;}
-      $('#git-status').textContent=`${list.length}권 원격 데이터 불러오는 중…`;
-      let count=0;
-      for(const remote of list){
-        const metadata=await pullRemoteBook(remote.id);
-        let local=state.books.find(b=>b.id===remote.id);
-        if(!local){local=makeBook(remote.title||'Remote book','',remote.sourceType||'unknown');local.id=remote.id;local.title=remote.title;local.createdAt=remote.createdAt||null;local.blocks=[];state.books.push(local);}
-        for(const section of ['annotations','progress','alignment']){
-          const data=metadata[section];if(!data)continue;
-          if(data.sourceFingerprint&&!local.blocks?.length)local.sourceFingerprint=data.sourceFingerprint;
-          if(section==='annotations')local.annotations=mergeById(local.annotations||[],data.annotations||[]);
-          if(section==='progress')local.progress=mergeProgress(local.progress||{},data.progress||{});
-          if(section==='alignment'){
-            local.audioMappings=mergeById(local.audioMappings||[],data.audioMappings||[]);
-            local.wordAlignments=mergeAlignment(local.wordAlignments||{},data.wordAlignments||{});
-            const seen=new Set(local.audioTracks.map(x=>x.id));
-            for(const a of data.audioTracks||[])if(!seen.has(a.id))local.audioTracks.push(a);
-          }
-        }
-        await saveBook(local);count++;
-      }
-      updateLibrary();closeDialog();if(!state.book&&state.books[0])await chooseBook(state.books[0].id);else{renderReader();renderNotes();renderAudio();}
-      toast(`${count}권의 원격 학습 기록을 불러왔습니다. 원문·오디오는 기기에서 다시 연결해야 할 수 있습니다.`);
+      const count=await restoreRemoteLibrary(message=>$('#git-status').textContent=message);
+      closeDialog();
+      toast(`${count}권의 Data 학습 기록을 불러왔습니다. 원서 원본과 음원이 없으면 동일 파일을 연결하거나 Data에서 다운로드하세요.`);
     }catch(e){$('#git-status').textContent='복원 실패: '+e.message;toast(e.message,true);}
   };
 }
@@ -1932,6 +1915,16 @@ function bindEvents(){
   };
   $('#cancel-auto-align').onclick=()=>marginAutoAbort?.abort();
   $('#reset-auto-align').onclick=clearAndRestartAutomaticSync;
+  $('#restore-cross-device-sync').onclick=async()=>{
+    if(marginAutoAbort)return toast('자동 싱크를 중단한 후 불러와 주세요.',true);
+    const button=$('#restore-cross-device-sync');button.disabled=true;
+    try{
+      const count=await restoreRemoteLibrary(message=>$('#alignment-status').textContent=message);
+      $('#alignment-status').textContent='Data에서 '+count+'권의 학습 기록을 가져왔습니다. 미완료 싱크는 이어서 실행할 수 있습니다.';
+      toast('다른 기기의 단어 싱크와 이어하기 기록을 불러왔습니다.');
+    }catch(e){$('#alignment-status').textContent='불러오기 실패: '+e.message;toast(e.message,true);}
+    finally{button.disabled=false;}
+  };
   try{
     const selected=localStorage.getItem('margin-auto-sync-workers');
     if(selected==='1'||selected==='2')$('#sync-parallelism').value=selected;
@@ -1968,6 +1961,12 @@ async function boot(){
   updateLibrary();
   if(state.books.length){let remembered='';try{remembered=localStorage.getItem('margin-last-book')||'';}catch{}await chooseBook(state.books.find(b=>b.id===remembered)?.id||state.books[0].id);}
   else{setTitle();renderNotes();renderAudio();restoreStoredSyncProgress();}
+  // Remembered credentials let a newly opened device refresh the private
+  // library without requesting new transcription on that device.
+  if(gitReady())restoreRemoteLibrary().catch(e=>{
+    saveStatus('Data import failed','error');
+    console.warn('Remote learning records could not be refreshed:',e);
+  });
   if('serviceWorker' in navigator && location.protocol==='https:')navigator.serviceWorker.register('./sw.js').catch(()=>{});
 }
 boot();
