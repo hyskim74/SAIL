@@ -592,6 +592,14 @@ async function restoreRemoteLibrary(onStep=()=>{}){
     }
     // Refuse corrupt word offsets if the original was from a different edition.
     for(const section of ['annotations','progress','alignment'])mergeGitDataset(local,sections[section],section);
+    const activeOwner=sections.alignment?.activeRun?.id;
+    if(activeOwner){
+      for(const [trackId,entry] of Object.entries(sections.alignment?.wordAlignments||{})){
+        const cached=local.wordAlignments?.[trackId];
+        if(cached?.scan?.runId&&cached.scan.runId!==activeOwner)
+          local.wordAlignments[trackId]=entry; // current remote writer wins
+      }
+    }
     if(!local.progress?.position&&sections.progress?.progress?.position>0)
       local.progress=sections.progress.progress;
     if(!Number.isInteger(local.progress?.bodyStart)){
@@ -1625,10 +1633,12 @@ async function runAutomaticBookSync(){
   const scans=b.audioTracks.map(t=>({track:t,scan:b.wordAlignments?.[t.id]?.scan}))
     .filter(x=>x.scan&&(!Number.isFinite(x.scan.bodyStart)||x.scan.bodyStart===bodyStart))
     .sort((a,b)=>String(b.scan.updatedAt||'').localeCompare(String(a.scan.updatedAt||'')));
-  if(scans.some(x=>x.scan.complete)){
+  // When Data is connected, check its newest state before deciding that the
+  // local copy is complete: another device may have reset the sync.
+  if(scans.some(x=>x.scan.complete)&&!gitReady()){
     marginAutoAbort=null;button.disabled=false;cancel.hidden=true;
     $('#sync-parallelism').disabled=false;$('#reset-auto-align').disabled=false;
-    return toast('이 원서의 자동 싱크가 이미 완료되었습니다. 다시 시작하려면 기존 싱크 삭제 버튼을 누르세요.',false);
+    return toast('로컬 싱크가 완료되었습니다. Data에 연결하면 다른 기기의 최신 상태도 확인합니다.',false);
   }
   const latestScan=scans[0]?.scan||null;
   // After a full unsuccessful search, allow an explicit retry from the start.
