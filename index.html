@@ -1620,7 +1620,9 @@ async function runAutomaticBookSync(){
     latestScan.trackId===b.audioTracks[b.audioTracks.length-1]?.id&&
     Number.isFinite(latestScan.audioDuration)&&
     latestScan.nextAudio>=latestScan.audioDuration-.2;
-  const startingState=exhausted?null:latestScan;
+  let startingState=exhausted?null:latestScan;
+  const currentRunId=uuid();
+  let claimedRemote=false,lostRemoteOwnership=false,lastCheckpointPushedAt=0;
   // An earlier pending notes sync must not contend with on-device ASR.
   clearTimeout(state.syncTimers.get(b.id));state.syncTimers.delete(b.id);
   let checkpointsChanged=false;
@@ -1650,6 +1652,31 @@ async function runAutomaticBookSync(){
     record.words=list;
   }
   try{
+    if(gitReady()){
+      progress('Data에서 다른 기기의 최신 싱크 확인 및 작업 이어받기 중…');
+      const handoff=await claimRemoteSyncRun(b,currentRunId);
+      claimedRemote=handoff.claimed;
+      if(handoff.complete){
+        renderSyncProgress({phase:'complete',cursor:notes.length,bodyStart,totalChars:notes.length});
+        progress('다른 기기에서 이미 단어 싱크가 완료되었습니다. Data에서 결과를 가져왔습니다.');
+        await saveBook(b);
+        return;
+      }
+      // The remote checkpoint may be newer than the local checkpoint.
+      const remotelyRestored=(b.audioTracks||[]).map(t=>b.wordAlignments?.[t.id]?.scan)
+        .filter(x=>x&&(!Number.isFinite(x.bodyStart)||x.bodyStart===bodyStart))
+        .sort((a,b)=>String(b.updatedAt||'').localeCompare(String(a.updatedAt||'')))[0];
+      if(remotelyRestored){
+        const retryFromStart=!remotelyRestored.found&&
+          remotelyRestored.trackId===b.audioTracks.at(-1)?.id&&
+          Number.isFinite(remotelyRestored.audioDuration)&&
+          remotelyRestored.nextAudio>=remotelyRestored.audioDuration-.2;
+        startingState=retryFromStart?null:remotelyRestored;
+      }
+    }else{
+      progress('Data 연결이 없어 이 기기에만 싱크가 저장됩니다. 다른 기기에서 이용하려면 Settings & sync에서 먼저 연결하세요.');
+    }
+    if(ctl.signal.aborted)throw new DOMException('취소됨','AbortError');
     progress('Whisper 음성 인식 모델 준비 중… 첫 실행에는 다운로드가 필요합니다.');
     const pipe=await recognizer(progress);
     if(ctl.signal.aborted)throw new DOMException('취소됨','AbortError');
@@ -1686,7 +1713,7 @@ async function runAutomaticBookSync(){
       save:async ({trackId,words,scan})=>{
         const record=b.wordAlignments[trackId]||{words:[]};
         addAlignedWords(trackId,record,words);
-        record.scan={...scan,bodyStart};
+        record.scan={...scan,bodyStart,runId:currentRunId};
         record.source='browser-whisper-auto';
         record.updatedAt=isoNow();
         b.wordAlignments[trackId]=record;
@@ -1694,7 +1721,18 @@ async function runAutomaticBookSync(){
         // Persist locally throughout the job; do NOT queue repeated GitHub syncs.
         if(state.book?.id===b.id)scheduleSave(false);
         else await saveBook(b);
-        if(words.length)progress('본문 자동 싱크 진행: '+record.words.length+'개 단어 연결 · 오디오 '+Math.floor(scan.nextAudio)+'초');
+        if(claimedRemote&&(lastCheckpointPushedAt===0||Date.now()-lastCheckpointPushedAt>=45000||scan.complete)){
+          try{
+            await saveBook(b);
+            await publishRemoteSyncCheckpoint(b,currentRunId,false);
+            lastCheckpointPushedAt=Date.now();
+            progress('Data에 중간 싱크 백업 완료 · '+record.words.length+'개 단어 · '+Math.floor(scan.nextAudio)+'초');
+          }catch(e){
+            if(e.code==='SYNC_TAKEN_OVER'){lostRemoteOwnership=true;throw e;}
+            lastCheckpointPushedAt=Date.now();
+            progress('Data 중간 백업 실패 (로컬 결과 보존): '+e.message);
+          }
+        }else if(words.length)progress('본문 자동 싱크 진행: '+record.words.length+'개 단어 연결 · 오디오 '+Math.floor(scan.nextAudio)+'초');
       }
     });
     if(data.foundTrack){state.activeTrack=data.foundTrack;await setActiveTrack(data.foundTrack,false);}
@@ -1705,7 +1743,12 @@ async function runAutomaticBookSync(){
       '오디오 자동 검색과 정렬 가능한 구간을 처리했습니다. 단어 '+data.aligned+'개 연결. 추가 음원이 있다면 등록해 주세요.');
     toast('자동 싱크 결과를 저장했습니다.');
   }catch(e){
-    if(ctl.signal.aborted||e.name==='AbortError'){
+    if(e.code==='SYNC_TAKEN_OVER'){
+      lostRemoteOwnership=true;
+      renderSyncProgress({...lastMetric,phase:'paused'});
+      progress('다른 기기로 싱크가 이어져 이 기기의 작업을 중단했습니다. Data의 최신 결과를 다시 불러오세요.');
+      toast('다른 기기가 싱크를 이어받았습니다.',true);
+    }else if(ctl.signal.aborted||e.name==='AbortError'){
       renderSyncProgress({...lastMetric,phase:'paused'});
       progress('자동 싱크를 중단했습니다. 현재까지 찾은 결과는 저장되며 다음에 이어서 진행할 수 있습니다.');
     }else{
@@ -1718,8 +1761,17 @@ async function runAutomaticBookSync(){
       clearTimeout(state.saveTimers.get(b.id));state.saveTimers.delete(b.id);
       try{await saveBook(b);}catch(e){toast('싱크 결과 로컬 저장 실패: '+e.message,true);}
     }
+    if(claimedRemote&&!lostRemoteOwnership){
+      try{
+        await publishRemoteSyncCheckpoint(b,currentRunId,true);
+        saveStatus('Partial sync backed up to Data');
+      }catch(e){
+        if(e.code==='SYNC_TAKEN_OVER')lostRemoteOwnership=true;
+        else toast('Data에 마지막 싱크를 저장하지 못했습니다. 로컬에만 보관됨: '+e.message,true);
+      }
+    }
     marginAutoAbort=null;
-    if(checkpointsChanged&&gitReady())scheduleSync(b); // One deferred private backup, not per audio window.
+    if(checkpointsChanged&&gitReady()&&!lostRemoteOwnership)scheduleSync(b);
     button.disabled=false;cancel.hidden=true;
     $('#sync-parallelism').disabled=false;$('#reset-auto-align').disabled=false;
     renderAudio();showBodyStart();
