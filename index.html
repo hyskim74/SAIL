@@ -1636,6 +1636,7 @@ async function runAutomaticBookSync(){
   const b=state.book;
   if(!b)return toast('먼저 원서를 불러오세요.',true);
   if(marginAutoAbort)return toast('자동 싱크가 이미 진행 중입니다.',true);
+  if(state.syncing)return toast('Data 동기화가 끝난 후 자동 싱크를 시작하세요.',true);
   const bodyStart=bodyStartPosition();
   if(bodyStart===null)return toast('본문 시작 문장을 드래그한 뒤 ① 본문 시작 표시를 눌러 주세요.',true);
   if(!b.blocks?.length)return toast('다른 기기의 싱크를 이어하려면 동일한 원서 파일을 Import a book에서 연결하세요.',true);
