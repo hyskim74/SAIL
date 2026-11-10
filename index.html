@@ -515,6 +515,12 @@ async function syncBook(book,onStep=()=>{}){
       const path=filepath(book.id,section);
       const remote=await getJSON(path);
       mergeGitDataset(book,remote.data,section);
+      // Never overwrite another device's active checkpoint from a normal
+      // notes/progress sync; its owner will publish the alignment separately.
+      if(section==='alignment'&&remote.data?.activeRun?.id&&
+         Date.now()-Date.parse(remote.data.activeRun.at||0)<CROSS_DEVICE_LEASE_MS){
+        onStep(section);break;
+      }
       const ours=gitDataset(book)[section];
       if(remote.data&&sortedJson(remote.data)===sortedJson(ours))break;
       try{
@@ -541,6 +547,100 @@ async function listRemoteBooks(){return (await getJSON('notes/index.json')).data
 async function pullRemoteBook(id){
   const out={};for(const s of ['annotations','progress','alignment'])out[s]=(await getJSON(filepath(id,s))).data;
   return out;
+}
+
+
+const CROSS_DEVICE_LEASE_MS=180000;
+function activeRemoteScan(book){
+  return (book.audioTracks||[]).map(t=>({track:t,scan:book.wordAlignments?.[t.id]?.scan}))
+    .filter(x=>x.scan)
+    .sort((a,b)=>String(b.scan.updatedAt||'').localeCompare(String(a.scan.updatedAt||'')))[0]||null;
+}
+async function restoreRemoteLibrary(onStep=()=>{}){
+  if(!gitReady())throw new Error('Settings & sync에서 비공개 Data 저장소를 연결하세요.');
+  if(marginAutoAbort)throw new Error('자동 싱크를 먼저 중단한 뒤 다른 기기의 결과를 불러오세요.');
+  await ensurePrivateData();
+  const list=await listRemoteBooks();
+  if(!list.length)return 0;
+  const remoteIds=new Set(list.map(x=>x.id));
+  let count=0;
+  for(const remote of list){
+    if(!remote?.id)continue;
+    onStep('다른 기기 싱크 불러오는 중: '+(remote.title||remote.id));
+    const sections=await pullRemoteBook(remote.id);
+    const reference=sections.alignment?.sourceFingerprint||sections.progress?.sourceFingerprint||sections.annotations?.sourceFingerprint||null;
+    let local=state.books.find(x=>x.id===remote.id);
+    if(!local&&reference){
+      // Reuse a separately imported but not yet Git-registered matching book.
+      local=state.books.find(x=>x.sourceFingerprint===reference&&x.blocks?.length&&!remoteIds.has(x.id));
+      if(local)local.id=remote.id;
+    }
+    if(!local){
+      local=makeBook(remote.title||'Remote book','',remote.sourceType||'unknown');
+      local.id=remote.id;local.title=remote.title||local.title;
+      local.createdAt=remote.createdAt||local.createdAt;
+      local.blocks=[];
+      if(reference)local.sourceFingerprint=reference;
+      state.books.push(local);
+    }
+    // Refuse corrupt word offsets if the original was from a different edition.
+    for(const section of ['annotations','progress','alignment'])mergeGitDataset(local,sections[section],section);
+    if(!Number.isInteger(local.progress?.bodyStart)){
+      const scan=activeRemoteScan(local)?.scan;
+      if(Number.isInteger(scan?.bodyStart))local.progress={...local.progress,bodyStart:scan.bodyStart};
+    }
+    await saveBook(local);
+    count++;
+  }
+  updateLibrary();
+  if(!state.book&&state.books.length)await chooseBook(state.books[0].id);
+  else if(state.book){renderReader();renderNotes();renderAudio();restoreStoredSyncProgress();}
+  return count;
+}
+async function fetchRemoteBookAlignment(book){
+  await ensurePrivateData();
+  const remote=await getJSON(filepath(book.id,'alignment'));
+  assertMatchingRemoteText(book,remote.data);
+  return remote;
+}
+async function claimRemoteSyncRun(book,runId){
+  const path=filepath(book.id,'alignment');
+  for(let attempt=0;attempt<4;attempt++){
+    const remote=await fetchRemoteBookAlignment(book);
+    const lease=remote.data?.activeRun;
+    if(lease?.id!==runId&&lease?.id&&Date.now()-Date.parse(lease.at||0)<CROSS_DEVICE_LEASE_MS){
+      if(!confirm('다른 기기에서 최근 자동 싱크를 수행했습니다. 현재 기기로 작업을 넘겨받을까요?\n\n다른 기기가 계속 실행 중이면 작업이 중단될 수 있습니다.'))throw new Error('다른 기기의 자동 싱크를 유지했습니다.');
+    }
+    if(remote.data)mergeGitDataset(book,remote.data,'alignment');
+    if((book.audioTracks||[]).some(t=>book.wordAlignments?.[t.id]?.scan?.complete))
+      return {claimed:false,complete:true};
+    const payload={...gitDataset(book).alignment,activeRun:{id:runId,at:isoNow()}};
+    try{
+      await putJSON(path,payload,remote.sha,'Claim cross-device audiobook sync');
+      await updateIndex([{id:book.id,title:book.title,sourceType:book.sourceType,createdAt:book.createdAt||null,updatedAt:isoNow()}]);
+      await saveBook(book);
+      return {claimed:true,complete:false};
+    }catch(e){if((e.status===409||e.status===422)&&attempt<3)continue;throw e;}
+  }
+  throw new Error('다른 기기가 동시에 싱크를 변경하고 있어 시작하지 못했습니다.');
+}
+async function publishRemoteSyncCheckpoint(book,runId,finished=false){
+  const path=filepath(book.id,'alignment');
+  for(let attempt=0;attempt<4;attempt++){
+    const remote=await fetchRemoteBookAlignment(book);
+    if(remote.data?.activeRun?.id!==runId){
+      const err=new Error('다른 기기로 싱크 작업이 넘어갔습니다. 이 기기의 싱크를 중지합니다.');
+      err.code='SYNC_TAKEN_OVER';throw err;
+    }
+    if(remote.data)mergeGitDataset(book,remote.data,'alignment');
+    const payload={...gitDataset(book).alignment,
+      activeRun:finished?null:{id:runId,at:isoNow()}};
+    try{
+      await putJSON(path,payload,remote.sha,finished?'Finish cross-device audiobook checkpoint':'Save partial audiobook sync checkpoint');
+      return true;
+    }catch(e){if((e.status===409||e.status===422)&&attempt<3)continue;throw e;}
+  }
+  throw new Error('다른 기기에서 싱크 파일이 변경되어 백업을 완료하지 못했습니다.');
 }
 
 async function listHistory(bookId,section='annotations'){
