@@ -327,6 +327,17 @@ function mergeGitDataset(book, remote,section) {
   if(section==='alignment'){
     book.audioMappings=mergeById(book.audioMappings||[],remote.audioMappings||[]);
     book.wordAlignments=mergeAlignment(book.wordAlignments||{},remote.wordAlignments||{});
+    // A stale device may have more recent local timestamps than the current
+    // authoritative remote session. Prefer the remotely committed run ID,
+    // unless this device explicitly reset its local automatic sync.
+    for(const [trackId,remoteEntry] of Object.entries(remote.wordAlignments||{})){
+      const local=book.wordAlignments[trackId];
+      const author=remoteEntry?.scan?.runId;
+      if(author&&(author===remote.activeRun?.id||author===remote.lastRunId)&&
+        local?.scan?.runId&&local.scan.runId!==author&&
+        local.scan.runId!==remote.activeRun?.id&&local.source!=='automatic-sync-reset')
+        book.wordAlignments[trackId]=remoteEntry;
+    }
     book.audioTracks||=[];
     const existing=new Map((book.audioTracks||[]).map(t=>[t.id,t]));
     for(const t of remote.audioTracks||[]){const local=existing.get(t.id);if(local){if(t.remote&&!local.remote)local.remote=t.remote;}else{book.audioTracks.push(t);existing.set(t.id,t);}}
@@ -523,6 +534,7 @@ async function syncBook(book,onStep=()=>{}){
         onStep(section);break;
       }
       const ours=gitDataset(book)[section];
+      if(section==='alignment'&&remote.data?.lastRunId)ours.lastRunId=remote.data.lastRunId;
       if(remote.data&&sortedJson(remote.data)===sortedJson(ours))break;
       try{
         await putJSON(path,ours,remote.sha,`Sync ${section} for ${book.title}`);break;
@@ -592,7 +604,7 @@ async function restoreRemoteLibrary(onStep=()=>{}){
     }
     // Refuse corrupt word offsets if the original was from a different edition.
     for(const section of ['annotations','progress','alignment'])mergeGitDataset(local,sections[section],section);
-    const activeOwner=sections.alignment?.activeRun?.id;
+    const activeOwner=sections.alignment?.activeRun?.id||sections.alignment?.lastRunId;
     if(activeOwner){
       for(const [trackId,entry] of Object.entries(sections.alignment?.wordAlignments||{})){
         const cached=local.wordAlignments?.[trackId];
@@ -641,7 +653,8 @@ async function claimRemoteSyncRun(book,runId){
     if(remote.data)mergeGitDataset(book,remote.data,'alignment');
     if((book.audioTracks||[]).some(t=>book.wordAlignments?.[t.id]?.scan?.complete))
       return {claimed:false,complete:true};
-    const payload={...gitDataset(book).alignment,activeRun:{id:runId,at:isoNow()}};
+    const payload={...gitDataset(book).alignment,activeRun:{id:runId,at:isoNow()},
+      lastRunId:remote.data?.lastRunId||null};
     try{
       await putJSON(path,payload,remote.sha,'Claim cross-device audiobook sync');
       await updateIndex([{id:book.id,title:book.title,sourceType:book.sourceType,createdAt:book.createdAt||null,updatedAt:isoNow()}]);
@@ -661,7 +674,7 @@ async function publishRemoteSyncCheckpoint(book,runId,finished=false){
     }
     if(remote.data)mergeGitDataset(book,remote.data,'alignment');
     const payload={...gitDataset(book).alignment,
-      activeRun:finished?null:{id:runId,at:isoNow()}};
+      activeRun:finished?null:{id:runId,at:isoNow()},lastRunId:runId};
     try{
       await putJSON(path,payload,remote.sha,finished?'Finish cross-device audiobook checkpoint':'Save partial audiobook sync checkpoint');
       return true;
