@@ -311,14 +311,22 @@ function gitDataset(book) {
     alignment:{bookId:book.id,title:book.title,sourceFingerprint:book.sourceFingerprint||null,audioTracks:book.audioTracks||[],audioMappings:book.audioMappings||[],wordAlignments:book.wordAlignments||{}}
   };
 }
+function assertMatchingRemoteText(book,remote){
+  if(!remote?.sourceFingerprint||!book?.blocks?.length)return;
+  const actual=fingerprint(bookText(book));
+  if(actual!==remote.sourceFingerprint)
+    throw new Error('다른 판본/내용의 원서입니다. 이 책의 단어 싱크를 잘못된 본문에 적용하지 않도록 중단했습니다. 원래 사용한 원서를 다시 연결하세요.');
+}
 function mergeGitDataset(book, remote,section) {
   if(!remote)return book;
+  assertMatchingRemoteText(book,remote);
   if((!book.blocks?.length || !book.sourceFingerprint)&&remote.sourceFingerprint)book.sourceFingerprint=remote.sourceFingerprint;
   if(section==='annotations')book.annotations=mergeById(book.annotations||[],remote.annotations||[]);
   if(section==='progress')book.progress=mergeProgress(book.progress||{},remote.progress||{});
   if(section==='alignment'){
     book.audioMappings=mergeById(book.audioMappings||[],remote.audioMappings||[]);
     book.wordAlignments=mergeAlignment(book.wordAlignments||{},remote.wordAlignments||{});
+    book.audioTracks||=[];
     const existing=new Map((book.audioTracks||[]).map(t=>[t.id,t]));
     for(const t of remote.audioTracks||[]){const local=existing.get(t.id);if(local){if(t.remote&&!local.remote)local.remote=t.remote;}else{book.audioTracks.push(t);existing.set(t.id,t);}}
   }
@@ -1269,6 +1277,23 @@ function openImportDialog(){
       if(file)book=($('#import-ocr').checked&&file.name.toLowerCase().endsWith('.pdf')) ? await ocrPdf(file,s=>$('#import-status').textContent=s) : await importBook(file,s=>$('#import-status').textContent=s);
       else book=makeBook(title||'Pasted text',pasted,'pasted');
       if(title)book.title=title;
+      // An imported original with identical canonical text can reattach to the
+      // remote placeholder, keeping its stable book/track IDs and timestamps.
+      const same=state.books.find(b=>b.sourceFingerprint===book.sourceFingerprint);
+      if(same){
+        if(!same.blocks?.length){
+          same.blocks=book.blocks;
+          same.sourceType=book.sourceType;
+          same.updatedAt=isoNow();
+          await saveBook(same);
+          closeDialog();await chooseBook(same.id);
+          toast('기존 Data 도서에 동일 원서를 연결했습니다. 저장된 단어 싱크를 유지합니다.');
+        }else{
+          closeDialog();await chooseBook(same.id);
+          toast('이미 등록된 동일 원서를 열었습니다. 기존 싱크를 유지합니다.');
+        }
+        return;
+      }
       book.createdAt=isoNow(); // successful import time, not OCR/parser start time
       state.books.push(book);await saveBook(book);
       closeDialog();await chooseBook(book.id);toast('책을 가져왔습니다.');
